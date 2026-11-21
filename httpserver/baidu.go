@@ -152,8 +152,8 @@ func (c baiduConfig) missingFields() []string {
 	}
 	if c.redirectURI == "" {
 		missing = append(missing, "BAIDU_REDIRECT_URI")
-	} else if u, err := url.Parse(c.redirectURI); err != nil || u.Scheme == "" || u.Host == "" || u.Path != baiduCallbackPath {
-		missing = append(missing, "BAIDU_REDIRECT_URI(path must be "+baiduCallbackPath+")")
+	} else if u, err := url.Parse(c.redirectURI); err != nil || u.Scheme == "" || u.Host == "" || u.Path == "" || u.Path == "/" {
+		missing = append(missing, "BAIDU_REDIRECT_URI(must be an absolute URL with a callback path)")
 	}
 	return missing
 }
@@ -266,10 +266,17 @@ func baiduWriteRelayError(w http.ResponseWriter, err error) {
 // ── Cookies ──────────────────────────────────────────────────────────────────
 
 func baiduSetCookie(w http.ResponseWriter, name, value string, maxAge int) {
+	baiduSetCookieAtPath(w, name, value, maxAge, baiduCookiePath)
+}
+
+// baiduSetCookieAtPath issues a cookie scoped to path. Token cookies stay under
+// /baidu-api; the OAuth state cookie must use the configured callback path so a
+// callback served behind a different prefix still receives it.
+func baiduSetCookieAtPath(w http.ResponseWriter, name, value string, maxAge int, path string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     name,
 		Value:    value,
-		Path:     baiduCookiePath,
+		Path:     path,
 		MaxAge:   maxAge,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
@@ -278,15 +285,30 @@ func baiduSetCookie(w http.ResponseWriter, name, value string, maxAge int) {
 }
 
 func baiduDeleteCookie(w http.ResponseWriter, name string) {
+	baiduDeleteCookieAtPath(w, name, baiduCookiePath)
+}
+
+func baiduDeleteCookieAtPath(w http.ResponseWriter, name, path string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     name,
 		Value:    "",
-		Path:     baiduCookiePath,
+		Path:     path,
 		MaxAge:   -1,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Secure:   baiduCfg.cookieSecure,
 	})
+}
+
+// baiduStateCookiePath returns the scope of the one-time OAuth state cookie.
+// It follows the configured redirect URI path so the browser sends the cookie
+// to the callback even when that callback lives outside /baidu-api.
+func baiduStateCookiePath() string {
+	u, err := url.Parse(baiduCfg.redirectURI)
+	if err != nil || u.Path == "" || u.Path == "/" {
+		return baiduCallbackPath
+	}
+	return u.Path
 }
 
 func baiduCookieValue(r *http.Request, name string) string {
@@ -899,7 +921,7 @@ func baiduHandleAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	// The one-time state cookie binds the callback to this browser; it expires
 	// after ten minutes and is deleted as soon as the callback is handled.
-	baiduSetCookie(w, baiduStateCookie, state, baiduStateMaxAge)
+	baiduSetCookieAtPath(w, baiduStateCookie, state, baiduStateMaxAge, baiduStateCookiePath())
 
 	query := url.Values{}
 	query.Set("response_type", "code")
@@ -927,7 +949,7 @@ func baiduHandleCallback(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	state := r.URL.Query().Get("state")
 	cookieState := baiduCookieValue(r, baiduStateCookie)
-	baiduDeleteCookie(w, baiduStateCookie)
+	baiduDeleteCookieAtPath(w, baiduStateCookie, baiduStateCookiePath())
 
 	// Constant-time comparison: a callback carrying a foreign or replayed state
 	// must never be able to install tokens for another browser.
@@ -1162,8 +1184,9 @@ func baiduHandleDownload(w http.ResponseWriter, r *http.Request) {
 }
 
 func baiduHandleLogout(w http.ResponseWriter, r *http.Request) {
-	for _, name := range []string{baiduAccessCookie, baiduExpiryCookie, baiduRefreshCookie, baiduStateCookie} {
+	for _, name := range []string{baiduAccessCookie, baiduExpiryCookie, baiduRefreshCookie} {
 		baiduDeleteCookie(w, name)
 	}
+	baiduDeleteCookieAtPath(w, baiduStateCookie, baiduStateCookiePath())
 	w.WriteHeader(http.StatusNoContent)
 }

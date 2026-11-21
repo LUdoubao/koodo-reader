@@ -107,6 +107,7 @@
     "analyze": "cross-env ANALYZE=true NODE_OPTIONS=--max-old-space-size=8192 vite build",
     "start": "vite",
     "build": "vite build",
+    "build:web": "vite build && node scripts/rewrite-web-asset-paths.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

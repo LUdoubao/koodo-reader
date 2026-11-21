@@ -152,11 +152,45 @@ func TestBaiduAuthRedirectsWithStateCookie(t *testing.T) {
 	if cookie == nil || cookie.Value != state {
 		t.Fatalf("state cookie missing or mismatched: %#v", cookie)
 	}
-	if !cookie.HttpOnly || cookie.Path != baiduCookiePath || cookie.SameSite != http.SameSiteLaxMode {
+	if !cookie.HttpOnly || cookie.Path != "/baidu-api/callback" || cookie.SameSite != http.SameSiteLaxMode {
 		t.Fatalf("state cookie attributes are unsafe: %#v", cookie)
 	}
 	if cookie.MaxAge != baiduStateMaxAge || !cookie.Secure {
 		t.Fatalf("state cookie lifetime/secure mismatch: %#v", cookie)
+	}
+}
+
+func TestBaiduAuthUsesConfiguredCallbackPath(t *testing.T) {
+	cfg := testBaiduConfig()
+	cfg.redirectURI = "https://reader.example.com/flow/api/callback/baidu"
+	withBaiduConfig(t, cfg)
+	if !cfg.enabled() {
+		t.Fatalf("custom callback path rejected: %v", cfg.missingFields())
+	}
+
+	rec := httptest.NewRecorder()
+	baiduAPIHandler(rec, baiduRequest(http.MethodGet, "/baidu-api/auth"))
+	if rec.Code != http.StatusFound {
+		t.Fatalf("status = %d, want 302", rec.Code)
+	}
+	location, err := url.Parse(rec.Header().Get("Location"))
+	if err != nil {
+		t.Fatalf("invalid Location: %v", err)
+	}
+	if got := location.Query().Get("redirect_uri"); got != cfg.redirectURI {
+		t.Fatalf("redirect_uri = %q, want %q", got, cfg.redirectURI)
+	}
+	cookie := recorderCookie(rec, baiduStateCookie)
+	if cookie == nil || cookie.Path != "/flow/api/callback/baidu" {
+		t.Fatalf("state cookie must follow the callback path: %#v", cookie)
+	}
+}
+
+func TestBaiduConfigRejectsCallbackWithoutPath(t *testing.T) {
+	cfg := testBaiduConfig()
+	cfg.redirectURI = "https://reader.example.com"
+	if cfg.enabled() {
+		t.Fatal("redirect URI without a callback path must stay disabled")
 	}
 }
 

@@ -55,7 +55,8 @@ const getTesseractWorker = (ocrLang: string, isElectronEnv: boolean) => {
       (async () => {
         const workerScript = await (
           await fetchWithTimeout(
-            `${isElectronEnv ? "." : ""}/lib/tesseractjs/worker.min.js`,
+            // 使用相对路径以兼容 /reader 子路径部署（Electron 下与原 `./lib/...` 等价）
+            "./lib/tesseractjs/worker.min.js",
             INIT_TIMEOUT_MS
           )
         ).text();
