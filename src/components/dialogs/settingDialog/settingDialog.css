@@ -38,6 +38,21 @@
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   gap: 2px;
+  /* The strip scrolls under the fixed close button in the top-right corner;
+     fade the last 56px so a scrolled tab label never sits visibly behind the
+     icon, and let the trailing padding end the strip inside the opaque zone. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(100% - 56px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(100% - 56px),
+    transparent 100%
+  );
 }
 
 [data-layout="mobile"] .setting-dialog-sidebar-title,
