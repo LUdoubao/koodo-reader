@@ -20,6 +20,19 @@
   flex-wrap: nowrap;
 }
 
+[data-layout="mobile"] .reader-toolbar-start {
+  top: var(--safe-top) !important;
+  left: 8px !important;
+  height: auto !important;
+}
+
+[data-layout="mobile"] .reader-toolbar-start .reader-setting-icon-container {
+  width: var(--tap-min) !important;
+  height: var(--tap-min) !important;
+  margin: 0;
+  float: none;
+}
+
 [data-layout="mobile"] .reader-quick-buttons .reader-setting-icon-container {
   width: var(--tap-min) !important;
   height: var(--tap-min) !important;

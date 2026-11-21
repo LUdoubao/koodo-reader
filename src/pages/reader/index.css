@@ -220,13 +220,50 @@
    them instead of the 28/25px desktop insets. */
 [data-layout="mobile"] .view-area-page,
 [data-layout="mobile"] .html-viewer-page {
-  top: calc(48px + var(--safe-top));
-  bottom: calc(60px + var(--safe-bottom));
+  top: calc(76px + var(--safe-top));
+  bottom: calc(64px + var(--safe-bottom));
 }
 
-/* mobile: the in-page header/footer chrome duplicates the always-on toolbars
-   and would otherwise show through them. */
-[data-layout="mobile"] .header-container,
+/* mobile: the engine centres the text column at 60% of the viewport, which
+   wastes 40% of a phone screen. Keep a small page gutter instead. */
+[data-layout="mobile"] .html-viewer-page {
+  width: calc(100% - 16px) !important;
+  max-width: calc(100% - 16px);
+  left: 8px !important;
+}
+
+/* mobile: the in-page header carries chapter title, reading time and progress.
+   The footer would collide with the bottom toolbar, so only the header stays,
+   as a compact status strip between the toolbar and the text. */
+[data-layout="mobile"] .header-container {
+  opacity: 1 !important;
+  pointer-events: none;
+  top: calc(50px + var(--safe-top));
+  left: 8px;
+  right: 8px;
+  width: calc(100% - 16px);
+  max-width: calc(100% - 16px);
+  height: 22px;
+  align-items: center;
+  padding: 0 4px;
+  box-sizing: border-box;
+  font-size: 12px;
+  line-height: 22px;
+  white-space: nowrap;
+  overflow: hidden;
+  z-index: 4;
+}
+
+[data-layout="mobile"] .header-container > * {
+  opacity: 0.75 !important;
+}
+
+[data-layout="mobile"] .header-container > :first-child {
+  opacity: 0.95 !important;
+  font-weight: 500;
+}
+
+/* mobile: the in-page footer duplicates the always-on bottom toolbar. */
 [data-layout="mobile"] .footer-container {
   opacity: 0;
   pointer-events: none;

@@ -240,6 +240,7 @@ const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
       )}
       {htmlBook && (
         <div
+          className="reader-toolbar-start"
           style={{
             ...DRAG_REGION_STYLE,
             position: "absolute",
@@ -261,7 +262,7 @@ const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
           }}
         >
           <div
-            className="reader-setting-icon-container"
+            className="reader-setting-icon-container reader-toolbar-exit"
             style={props.isNearEdge ? NO_DRAG_REGION_STYLE : undefined}
             aria-label={t("Exit")}
             data-tooltip-id="my-tooltip"
