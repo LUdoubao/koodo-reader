@@ -628,7 +628,9 @@ const ImportDialog = () => {
                 )}
               </div>
             )}
-            {driveList
+            {/* Web 端只保留百度网盘入口，其余云盘导入入口不展示；桌面端行为不变 */}
+            {isElectron &&
+              driveList
               .filter(
                 (item) =>
                   !item.scoped &&
