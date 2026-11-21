@@ -278,3 +278,47 @@
   border-left: 3px solid var(--color-theme-color, #0179ca);
   padding-left: 5px;
 }
+
+/* mobile: 44px chapter rows, tabs, search and header/body rhythm */
+[data-layout="mobile"] .book-content-list {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+[data-layout="mobile"] .navigation-navigation {
+  height: calc(48px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .navigation-navigation .book-content-title,
+[data-layout="mobile"] .navigation-navigation .book-bookmark-title {
+  min-height: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-layout="mobile"] .navigation-search-box,
+[data-layout="mobile"] .header-search-box {
+  width: min(220px, calc(100% - 30px)) !important;
+  height: 44px !important;
+}
+
+[data-layout="mobile"] .header-search-text {
+  width: calc(100% - 34px) !important;
+  height: 44px !important;
+}
+
+[data-layout="mobile"] .nav-lock-icon {
+  display: none;
+}
+
+[data-layout="mobile"] .navigation-body-parent {
+  top: 150px;
+  height: calc(100% - 198px - var(--safe-bottom));
+}
