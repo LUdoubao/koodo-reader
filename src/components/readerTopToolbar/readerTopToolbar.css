@@ -85,8 +85,8 @@
   display: none !important;
 }
 
-[data-layout="mobile"] .reader-toolbar-bookmark,
-[data-layout="mobile"] .reader-toolbar-fullscreen {
+[data-layout="mobile"] .reader-toolbar-fullscreen,
+[data-layout="mobile"] .reader-toolbar-assist-read {
   display: none !important;
 }
 

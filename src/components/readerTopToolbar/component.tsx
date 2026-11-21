@@ -277,21 +277,6 @@ const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
             ></span>
           </div>
           <div
-            className="reader-setting-icon-container reader-toolbar-bookmark"
-            style={props.isNearEdge ? NO_DRAG_REGION_STYLE : undefined}
-            aria-label={t("Bookmark")}
-            data-tooltip-id="my-tooltip"
-            data-tooltip-content={t("Bookmark")}
-            onClick={() => {
-              handleAddBookmark();
-            }}
-          >
-            <span
-              className="icon-bookmark-line reader-setting-icon"
-              style={{ fontSize: 19 }}
-            ></span>
-          </div>
-          <div
             className="reader-setting-icon-container reader-toolbar-fullscreen"
             style={props.isNearEdge ? NO_DRAG_REGION_STYLE : undefined}
             aria-label={t(isFullscreen ? "Exit full screen" : "Full screen")}
@@ -381,7 +366,24 @@ const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
           {currentBook && !isReadingRawPDF(currentBook) && (
             <>
               <div
+                className="reader-setting-icon-container reader-toolbar-bookmark"
+                aria-label={t("Bookmark")}
+                data-tooltip-id="my-tooltip"
+                data-tooltip-content={t("Bookmark")}
+                onClick={() => {
+                  handleAddBookmark();
+                }}
+              >
+                <span
+                  className="icon-bookmark-line reader-setting-icon"
+                  style={{ fontSize: 19 }}
+                ></span>
+              </div>
+              <div
                 className="reader-setting-icon-container"
+                aria-label={t("Translate")}
+                data-tooltip-id="my-tooltip"
+                data-tooltip-content={t("Translate")}
                 {...props.handleDialogButtonHover(
                   handleStudyLangDialog,
                   ".study-lang-dialog-container"
@@ -393,7 +395,10 @@ const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
                 ></span>
               </div>
               <div
-                className="reader-setting-icon-container"
+                className="reader-setting-icon-container reader-toolbar-assist-read"
+                aria-label={t("Reading option")}
+                data-tooltip-id="my-tooltip"
+                data-tooltip-content={t("Reading option")}
                 {...props.handleDialogButtonHover(
                   handleAssistReadDialog,
                   ".assist-read-dialog-container"
@@ -416,6 +421,9 @@ const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
             >
               <div
                 className="reader-setting-icon-container"
+                aria-label={t("Scale page")}
+                data-tooltip-id="my-tooltip"
+                data-tooltip-content={t("Scale page")}
                 {...props.handleDialogButtonHover(
                   handleScalePageDialog,
                   ".scale-page-dialog-container"
@@ -460,6 +468,9 @@ const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
           )}
           <div
             className="reader-setting-icon-container"
+            aria-label={t("Text to speech")}
+            data-tooltip-id="my-tooltip"
+            data-tooltip-content={t("Text to speech")}
             {...props.handleDialogButtonHover(
               handleSpeechDialog,
               ".speech-dialog-container"

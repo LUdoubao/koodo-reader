@@ -301,17 +301,34 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 1 1 0;
+  max-width: none;
+  min-width: 44px;
 }
 
 [data-layout="mobile"] .navigation-search-box,
 [data-layout="mobile"] .header-search-box {
   width: min(220px, calc(100% - 30px)) !important;
   height: 44px !important;
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .navigation-search-box .header-search-box {
+  width: 100% !important;
 }
 
 [data-layout="mobile"] .header-search-text {
   width: calc(100% - 34px) !important;
   height: 44px !important;
+}
+
+[data-layout="mobile"] .book-content-header .book-content-expand {
+  min-height: 44px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 [data-layout="mobile"] .nav-lock-icon {
