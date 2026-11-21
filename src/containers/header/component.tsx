@@ -58,6 +58,8 @@ export interface HeaderState {
   isHidePro: boolean;
   isSync: boolean;
   notificationCount: number;
+  /** Mobile-only search overlay state; desktop keeps the inline search box. */
+  isMobileSearchOpen: boolean;
 }
 
 const collectionUtil = new CollectionUtil(ConfigService);
@@ -65,6 +67,7 @@ declare var window: any;
 
 const Header = (props: HeaderProps) => {
   const isCollapsed = useAppStore((s) => s.sidebar.isCollapsed);
+  const handleMobileDrawer = useAppStore((s) => s.handleMobileDrawer);
   const currentBook = useAppStore((s) => s.book.currentBook);
   const isAuthed = useAppStore((s) => s.manager.isAuthed);
   const defaultSyncOption = useAppStore((s) => s.backupPage.defaultSyncOption);
@@ -100,6 +103,7 @@ const Header = (props: HeaderProps) => {
     isHidePro: false,
     isSync: false,
     notificationCount: 0,
+    isMobileSearchOpen: false,
   });
 
   const timerRef = useRef<any>(null);
@@ -765,7 +769,32 @@ const Header = (props: HeaderProps) => {
   }, [isAuthed]);
 
   return (
-    <div className="header" style={isCollapsed ? { marginLeft: "40px" } : {}}>
+    <div
+      className={
+        "header" + (state.isMobileSearchOpen ? " is-mobile-search-open" : "")
+      }
+      style={isCollapsed ? { marginLeft: "40px" } : {}}
+    >
+      <div
+        className="mobile-menu-button"
+        role="button"
+        aria-label={t("Menu")}
+        onClick={() => {
+          handleMobileDrawer(true);
+        }}
+      >
+        <span className="icon-menu"></span>
+      </div>
+      <div
+        className="mobile-search-toggle"
+        role="button"
+        aria-label={t("Search")}
+        onClick={() => {
+          setPartialState({ isMobileSearchOpen: true });
+        }}
+      >
+        <span className="icon-search"></span>
+      </div>
       {isAuthed && (
         <div
           className="header-chat-widget"
@@ -810,6 +839,16 @@ const Header = (props: HeaderProps) => {
         style={isCollapsed ? { width: "369px" } : {}}
       >
         <SearchBox />
+        <div
+          className="mobile-tap-target mobile-search-close"
+          role="button"
+          aria-label={t("Close panel")}
+          onClick={() => {
+            setPartialState({ isMobileSearchOpen: false });
+          }}
+        >
+          <span className="icon-close"></span>
+        </div>
       </div>
       <div
         className="setting-icon-parrent"

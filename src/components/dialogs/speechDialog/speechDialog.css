@@ -6,6 +6,17 @@
   margin-bottom: 0px;
   padding-top: 5px;
 }
+
+/* mobile: speech panel header keeps a touch target */
+[data-layout="mobile"] .speech-dialog-header {
+  min-height: var(--tap-min);
+}
+
+[data-layout="mobile"] .speech-dialog-container {
+  width: calc(100vw - var(--dialog-inset-narrow));
+  max-height: 60dvh;
+  overflow-y: auto;
+}
 .speech-dialog-title {
   font-size: 15px;
   font-weight: 600;

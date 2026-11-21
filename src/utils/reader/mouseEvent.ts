@@ -10,6 +10,10 @@ import {
   sleep,
 } from "../common";
 import { useAppStore } from "../../store/useAppStore";
+import {
+  isCoarsePointer,
+  resolveIsTouch,
+} from "../hooks/useLayoutMode";
 import Hammer from "hammerjs";
 import TTSUtil from "./ttsUtil";
 import {
@@ -506,7 +510,12 @@ export const bindHtmlEvent = (
     { passive: false }
   );
 
-  if (ConfigService.getReaderConfig("isTouch") === "yes") {
+  if (
+    resolveIsTouch(
+      ConfigService.getReaderConfig("isTouch"),
+      isCoarsePointer()
+    )
+  ) {
     const mc = new Hammer(doc);
     mc.on("panleft panright panup pandown", async (event: any) => {
       if (readerMode === "scroll") {

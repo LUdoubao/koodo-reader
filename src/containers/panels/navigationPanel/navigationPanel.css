@@ -6,6 +6,25 @@
   z-index: 10;
   overflow-x: hidden;
 }
+
+/* mobile: full-screen navigation panel */
+[data-layout="mobile"] .navigation-header {
+  position: static;
+  width: 100%;
+  height: auto;
+  min-height: 150px;
+  padding-top: var(--safe-top);
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .nav-close-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  font-size: 20px;
+}
 .book-cover {
   float: left;
   width: 91px;

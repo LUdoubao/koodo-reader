@@ -188,3 +188,47 @@
     display: none !important;
   }
 }
+
+/* mobile: full-screen reading panels with a visible close affordance */
+[data-layout="mobile"] .left-panel,
+[data-layout="mobile"] .right-panel {
+  display: none !important;
+}
+
+[data-layout="mobile"] .setting-panel-container,
+[data-layout="mobile"] .navigation-panel-container {
+  width: 100dvw;
+  max-width: 100%;
+  height: var(--app-height, 100dvh);
+  top: 0;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  box-sizing: border-box;
+  z-index: 35;
+  transition: transform 0.25s ease;
+}
+
+[data-layout="mobile"] .setting-panel-container {
+  right: 0;
+}
+
+[data-layout="mobile"] .navigation-panel-container {
+  left: 0;
+}
+
+[data-layout="mobile"] .view-area-page {
+  top: calc(28px + var(--safe-top));
+  bottom: calc(25px + var(--safe-bottom));
+}
+
+[data-layout="mobile"] .reader-window-drag-region {
+  display: none;
+}
+
+[data-layout="mobile"] .reader-setting-dialog-anchor {
+  top: calc(56px + var(--safe-top));
+  left: 8px;
+  right: 8px;
+  --reader-dialog-width: min(320px, calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+}

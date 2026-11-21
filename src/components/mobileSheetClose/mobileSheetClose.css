@@ -1,0 +1,20 @@
+/* mobile: close affordance for full-screen reader panels */
+.mobile-sheet-close {
+  display: none;
+}
+
+[data-layout="mobile"] .mobile-sheet-close {
+  position: absolute;
+  top: calc(8px + var(--safe-top));
+  right: 8px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  background: rgba(0, 0, 0, 0.06);
+}

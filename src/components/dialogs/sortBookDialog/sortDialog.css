@@ -28,6 +28,24 @@
   padding-right: 15px;
   border-radius: 3px;
 }
+
+/* mobile: menu-style panels sit above the home indicator */
+[data-layout="mobile"] .sort-dialog-container {
+  left: 8px;
+  right: 8px;
+  width: auto;
+  top: auto;
+  bottom: calc(8px + var(--safe-bottom));
+  max-height: 70dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .sort-by-category-list,
+[data-layout="mobile"] .sort-by-order-list {
+  min-height: var(--tap-min);
+}
 .sort-dialog-seperator {
   width: 100%;
   height: 0px;

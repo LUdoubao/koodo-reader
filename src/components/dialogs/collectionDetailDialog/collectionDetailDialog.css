@@ -12,6 +12,16 @@
   padding: 16px 10px;
   box-sizing: border-box;
 }
+
+/* mobile: clamp the 700px dialog to the viewport */
+[data-layout="mobile"] .collection-detail-dialog-container {
+  width: calc(100vw - var(--dialog-inset-narrow));
+  height: calc(var(--app-height, 100dvh) - 15vh);
+  left: 8px;
+  top: var(--dialog-sheet-top-compact);
+  padding: 12px 8px;
+  border-radius: 8px;
+}
 .collection-detail-dialog-close-container {
   position: absolute;
   top: 5px;

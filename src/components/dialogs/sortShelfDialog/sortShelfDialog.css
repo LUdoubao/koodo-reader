@@ -6,3 +6,10 @@
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+/* mobile: shelf rows keep a touch height inside the sheet */
+[data-layout="mobile"] .sort-shelf-label {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+}

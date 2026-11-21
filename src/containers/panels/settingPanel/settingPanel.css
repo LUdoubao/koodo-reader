@@ -19,6 +19,29 @@
   opacity: 1;
 }
 
+/* mobile: full width panel with scrollable content and safe area */
+[data-layout="mobile"] .setting-panel-parent {
+  position: static;
+  width: 100%;
+  height: calc(100% - var(--safe-top) - var(--safe-bottom));
+  padding-top: var(--safe-top);
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+[data-layout="mobile"] .setting-panel-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  overflow-x: auto;
+}
+
+[data-layout="mobile"] .setting-panel-tabs > * {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+}
+
 .setting-panel-tabs {
   position: relative;
   display: flex;

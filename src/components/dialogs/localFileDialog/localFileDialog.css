@@ -6,3 +6,10 @@
   padding-right: 20px;
   text-align: center;
 }
+
+/* mobile: local import helper text fits narrow screens */
+[data-layout="mobile"] .backup-page-warning-text {
+  padding-left: var(--dialog-inset-x);
+  padding-right: 12px;
+  font-size: 14px;
+}

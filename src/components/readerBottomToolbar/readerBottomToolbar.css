@@ -163,3 +163,32 @@
     display: none;
   }
 }
+
+/* mobile: page turn controls and safe area */
+[data-layout="mobile"] .reader-bottom-toolbar-left {
+  gap: 4px;
+  min-width: 0;
+}
+
+[data-layout="mobile"] .reader-bottom-toolbar-right {
+  gap: 4px;
+}
+
+[data-layout="mobile"] .reader-bottom-toolbar .previous-chapter-single-container,
+[data-layout="mobile"] .reader-bottom-toolbar .next-chapter-single-container {
+  width: var(--tap-min) !important;
+  height: var(--tap-min) !important;
+}
+
+[data-layout="mobile"] .reader-bottom-toolbar {
+  padding-bottom: var(--safe-bottom);
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .reader-bottom-toolbar-info {
+  display: none;
+}
+
+[data-layout="mobile"] .reader-bottom-toolbar input[type="range"] {
+  min-width: 48px;
+}

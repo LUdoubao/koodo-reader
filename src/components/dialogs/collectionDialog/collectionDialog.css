@@ -12,6 +12,17 @@
   flex-direction: column;
   box-sizing: border-box;
 }
+
+/* mobile: fit the viewport and allow inner scrolling */
+[data-layout="mobile"] .collection-dialog-container {
+  width: calc(100vw - var(--dialog-inset-y));
+  height: auto;
+  max-height: calc(var(--app-height, 100dvh) - var(--dialog-inset-y));
+  left: var(--dialog-inset-x);
+  top: 12px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .collection-dialog-title {
   font-size: 18px;
   font-weight: 500;

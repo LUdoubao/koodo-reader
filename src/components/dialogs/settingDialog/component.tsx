@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import "./settingDialog.css";
+import MobileSheet from "../../mobileSheet";
 import { useAppStore } from "../../../store/useAppStore";
 import { Trans } from "react-i18next";
 import GeneralSetting from "../../../containers/settings/generalSetting";
@@ -103,7 +104,7 @@ const SettingDialog = () => {
   };
 
   return (
-      <div className="setting-dialog-container">
+    <MobileSheet className="setting-dialog-container" label="Setting">
         {/* Left sidebar */}
         <div className="setting-dialog-sidebar">
           <div className="setting-dialog-sidebar-title">
@@ -241,7 +242,7 @@ const SettingDialog = () => {
             )}
           </div>
         </div>
-      </div>
+    </MobileSheet>
   );
 };
 

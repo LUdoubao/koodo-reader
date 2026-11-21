@@ -10,6 +10,14 @@
   overflow-x: hidden;
 }
 
+/* mobile: submenu stays inside the viewport and scrolls */
+[data-layout="mobile"] .action-dialog-container {
+  max-width: calc(100vw - var(--dialog-inset-narrow));
+  max-height: calc(var(--app-height, 100dvh) - var(--dialog-inset-narrow));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .action-dialog-actions-container {
   font-size: 15px;
   text-align: center;

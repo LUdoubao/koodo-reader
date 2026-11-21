@@ -53,3 +53,9 @@
   left: 10vw;
   bottom: 20px;
 }
+
+/* mobile: manager content area clears the fixed header and bottom bar */
+[data-layout="mobile"] .manager {
+  height: var(--app-height, 100dvh);
+  overflow-x: hidden;
+}

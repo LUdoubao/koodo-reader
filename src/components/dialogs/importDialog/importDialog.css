@@ -5,6 +5,17 @@
   width: 100%;
   padding: 10px 0;
 }
+
+/* mobile: import options stay scrollable and tappable */
+[data-layout="mobile"] .import-dialog-option,
+[data-layout="mobile"] .cloud-drive-item {
+  min-height: var(--tap-min);
+}
+
+[data-layout="mobile"] .cloud-drive-list {
+  gap: 4px;
+  padding: 4px 0;
+}
 .import-dialog-folder-button {
   display: flex;
   align-items: center;

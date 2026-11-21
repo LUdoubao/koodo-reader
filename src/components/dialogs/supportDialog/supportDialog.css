@@ -7,6 +7,13 @@
   position: absolute;
   right: 12px;
 }
+
+/* mobile: actions stay reachable above the safe area */
+[data-layout="mobile"] .support-us-out-button {
+  bottom: calc(20px + var(--safe-bottom));
+  right: 12px;
+  min-height: var(--tap-min);
+}
 .support-us-need-help,
 .support-us-log-out {
   min-width: 60px;

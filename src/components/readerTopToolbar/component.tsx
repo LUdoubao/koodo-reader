@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import "./readerTopToolbar.css";
 import { Trans, useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { isElectron } from "react-device-detect";
@@ -287,7 +288,7 @@ const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
             ></span>
           </div>
           <div
-            className="reader-setting-icon-container"
+            className="reader-setting-icon-container reader-toolbar-fullscreen"
             style={props.isNearEdge ? NO_DRAG_REGION_STYLE : undefined}
             aria-label={t(isFullscreen ? "Exit full screen" : "Full screen")}
             data-tooltip-id="my-tooltip"

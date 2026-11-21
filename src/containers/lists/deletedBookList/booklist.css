@@ -14,3 +14,13 @@
   padding-right: 10px;
   margin-bottom: 5px;
 }
+
+/* mobile: trash list shares the book list shell metrics */
+[data-layout="mobile"] .booklist-delete-container {
+  height: var(--tap-min);
+  line-height: var(--tap-min);
+}
+
+[data-layout="mobile"] .delete-shelf-icon {
+  margin-left: 12px;
+}

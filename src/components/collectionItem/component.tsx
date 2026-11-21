@@ -11,6 +11,8 @@ import {
   CONTEXT_MENU_WIDTH,
 } from "../../utils/common";
 import { useAppStore } from "../../store/useAppStore";
+import { useLayoutMode } from "../../utils/hooks/useLayoutMode";
+import { useLongPress } from "../../utils/hooks/useLongPress";
 
 import CollectionModel from "../../models/Collection";
 
@@ -26,6 +28,7 @@ export interface CollectionItemProps {
 declare var window: any;
 
 const CollectionItem: React.FC<CollectionItemProps> = (props) => {
+  const { layout } = useLayoutMode();
   const isOpenActionDialog = useAppStore((s) => s.book.isOpenActionDialog);
   const currentBook = useAppStore((s) => s.book.currentBook);
   const isSelectBook = useAppStore((s) => s.manager.isSelectBook);
@@ -106,6 +109,13 @@ const CollectionItem: React.FC<CollectionItemProps> = (props) => {
   };
 
   const actionProps = { left, top };
+  const longPressHandlers = useLongPress((x, y) => {
+    handleMoreAction({
+      preventDefault: () => {},
+      clientX: x,
+      clientY: y,
+    });
+  });
   const dropHandlers = {
     onDragOver: handleCollectionDropDragOver,
     onDragEnter: handleCollectionDropDragEnter,
@@ -158,12 +168,13 @@ const CollectionItem: React.FC<CollectionItemProps> = (props) => {
       <>
         <div
           className="book-list-item-container"
-          draggable
+          draggable={layout === "desktop"}
           onDragStart={handleBookDragStart}
           onContextMenu={(event) => {
             handleMoreAction(event);
           }}
           {...dropHandlers}
+          {...longPressHandlers}
         >
           <div
             className="book-item-list-cover"
@@ -237,12 +248,13 @@ const CollectionItem: React.FC<CollectionItemProps> = (props) => {
       <>
         <div
           className="book-list-cover-item"
-          draggable
+          draggable={layout === "desktop"}
           onDragStart={handleBookDragStart}
           onContextMenu={(event) => {
             handleMoreAction(event);
           }}
           {...dropHandlers}
+          {...longPressHandlers}
         >
           <div className="book-cover-item-header">
             <div className="reading-progress-icon">
@@ -331,12 +343,13 @@ const CollectionItem: React.FC<CollectionItemProps> = (props) => {
     <>
       <div
         className="book-list-item"
-        draggable
+        draggable={layout === "desktop"}
         onDragStart={handleBookDragStart}
         onContextMenu={(event) => {
           handleMoreAction(event);
         }}
         {...dropHandlers}
+        {...longPressHandlers}
       >
         <div
           className="book-item-cover"

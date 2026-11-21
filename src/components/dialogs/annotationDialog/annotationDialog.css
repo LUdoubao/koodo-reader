@@ -8,12 +8,22 @@
   align-items: center;
   gap: 14px;
   padding: 8px 12px;
-  max-width: calc(100vw - 16px);
+  max-width: calc(100vw - var(--dialog-inset-narrow));
   border-radius: 12px;
   background: var(--panel-bg);
   box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.2);
   color: var(--text-color);
   animation: annotation-dialog-appear 0.12s ease-out;
+}
+
+/* mobile: keep the toolbar above the home indicator and scroll sideways */
+[data-layout="mobile"] .annotation-dialog-container {
+  bottom: calc(64px + var(--safe-bottom));
+  max-width: calc(100vw - var(--dialog-inset-narrow));
+  min-height: var(--tap-min);
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
 }
 @keyframes annotation-dialog-appear {
   from {

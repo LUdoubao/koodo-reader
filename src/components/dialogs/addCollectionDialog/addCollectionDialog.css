@@ -17,6 +17,21 @@
   margin-bottom: 12px;
   width: 100%;
 }
+
+/* mobile: narrower padding and touch-height rows */
+[data-layout="mobile"] .add-collection-dialog-body {
+  padding: 0 12px;
+}
+
+[data-layout="mobile"] .add-collection-dialog-list-box {
+  height: var(--tap-min);
+}
+
+[data-layout="mobile"] .add-collection-dialog-list-option {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+}
 .add-collection-dialog-label {
   font-size: 15px;
   font-weight: 500;

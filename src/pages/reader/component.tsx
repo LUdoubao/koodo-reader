@@ -40,6 +40,12 @@ import {
 } from "../../utils/common";
 import { getOuterDoc } from "../../utils/reader/docUtil";
 import { useAppStore } from "../../store/useAppStore";
+import {
+  isCoarsePointer,
+  resolveIsTouch,
+  useLayoutMode,
+} from "../../utils/hooks/useLayoutMode";
+import MobileSheetClose from "../../components/mobileSheetClose";
 
 const QUICK_BUTTON_EDGE_DISTANCE = 40;
 
@@ -117,6 +123,7 @@ const Reader = () => {
   const handleFetchUserInfo = useAppStore((s) => s.handleFetchUserInfo);
   const handleBackgroundColor = useAppStore((s) => s.handleBackgroundColor);
   const { t } = useTranslation();
+  const { layout } = useLayoutMode();
   const currentProps = {
     t,
     currentBook,
@@ -159,7 +166,11 @@ const Reader = () => {
     isOpenRightPanel: isSettingLocked,
     totalDuration: 0,
     currentDuration: 0,
-    isTouch: ConfigService.getReaderConfig("isTouch") === "yes",
+    // Saved yes/no wins; a missing value follows the coarse pointer capability.
+    isTouch: resolveIsTouch(
+      ConfigService.getReaderConfig("isTouch"),
+      isCoarsePointer()
+    ),
     isPreventTrigger:
       ConfigService.getReaderConfig("isPreventTrigger") === "yes",
     isNearEdge: false,
@@ -786,10 +797,19 @@ const Reader = () => {
           state.isOpenRightPanel
             ? {}
             : {
-                transform: "translateX(309px)",
+                transform:
+                  layout === "mobile" ? "translateX(100%)" : "translateX(309px)",
               }
         }
       >
+        {layout === "mobile" && state.isOpenRightPanel && (
+          <MobileSheetClose
+            label={t("Close panel")}
+            onClose={() => {
+              handleLeaveReader("right");
+            }}
+          />
+        )}
         <SettingPanel />
       </div>
       <div
@@ -804,10 +824,21 @@ const Reader = () => {
           state.isOpenLeftPanel
             ? {}
             : {
-                transform: "translateX(-309px)",
+                transform:
+                  layout === "mobile"
+                    ? "translateX(-100%)"
+                    : "translateX(-309px)",
               }
         }
       >
+        {layout === "mobile" && state.isOpenLeftPanel && (
+          <MobileSheetClose
+            label={t("Close panel")}
+            onClose={() => {
+              handleLeaveReader("left");
+            }}
+          />
+        )}
         <NavigationPanel
           {...({
             totalDuration: state.totalDuration,

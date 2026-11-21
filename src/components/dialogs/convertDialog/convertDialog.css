@@ -6,6 +6,17 @@
   margin-bottom: 0px;
   padding-top: 5px;
 }
+
+/* mobile: full width options and touch-height rows */
+[data-layout="mobile"] .convert-dialog-container {
+  width: calc(100vw - var(--dialog-inset-narrow)) !important;
+  left: 8px !important;
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .convert-dialog-header {
+  min-height: var(--tap-min);
+}
 .convert-dialog-title {
   font-size: 15px;
   font-weight: 600;

@@ -7,8 +7,12 @@ import Login from "../pages/login";
 import Stats from "../pages/stats";
 import HtmlReader from "../pages/reader";
 import _Redirect from "../pages/redirect";
+import { useLayoutMode } from "../utils/hooks/useLayoutMode";
 
 const Router = () => {
+  // Writes data-layout on <html> for every route, so CSS and JS share one
+  // breakpoint fact source.
+  useLayoutMode();
   useEffect(() => {
     const lng = ConfigService.getReaderConfig("lang");
 

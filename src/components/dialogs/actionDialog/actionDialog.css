@@ -9,6 +9,23 @@
   overflow: hidden;
   overflow-x: hidden;
 }
+
+/* mobile: context menu stays in viewport and scrolls */
+[data-layout="mobile"] .action-dialog-container {
+  max-width: calc(100vw - var(--dialog-inset-narrow));
+  max-height: calc(var(--app-height, 100dvh) - var(--dialog-inset-narrow));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+[data-layout="mobile"] .action-dialog-actions-container {
+  max-height: none;
+}
+
+[data-layout="mobile"] .action-dialog-edit,
+[data-layout="mobile"] .action-name {
+  min-height: var(--tap-min);
+}
 .view-icon {
   font-size: 16px;
 }

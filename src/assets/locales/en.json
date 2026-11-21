@@ -1229,5 +1229,7 @@
   "Baidu Netdisk authorization failed": "Baidu Netdisk authorization failed",
   "Baidu Netdisk is not configured on this server": "Baidu Netdisk is not configured on this server",
   "No books found in this folder": "No books found in this folder",
-  "Disconnect": "Disconnect"
+  "Disconnect": "Disconnect",
+  "Menu": "Menu",
+  "Close panel": "Close panel"
 }
