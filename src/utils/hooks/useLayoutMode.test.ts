@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
+  createResizeThrottle,
   LAYOUT_OVERRIDE_KEY,
   MOBILE_MAX_WIDTH,
   readLayoutOverride,
@@ -56,4 +57,35 @@ describe("resolveIsTouch", () => {
 
 it("uses a stable session storage key", () => {
   expect(LAYOUT_OVERRIDE_KEY).toBe("koodo-layout-override");
+});
+
+describe("createResizeThrottle", () => {
+  it("runs the leading call and coalesces trailing calls", () => {
+    vi.useFakeTimers();
+    const calls: number[] = [];
+    const throttle = createResizeThrottle(() => calls.push(1), 300);
+
+    throttle.run();
+    throttle.run();
+    expect(calls.length).toBe(1);
+
+    vi.advanceTimersByTime(300);
+    expect(calls.length).toBe(2);
+    vi.useRealTimers();
+  });
+
+  it("drops the pending trailing call after cancel", () => {
+    vi.useFakeTimers();
+    const calls: number[] = [];
+    const throttle = createResizeThrottle(() => calls.push(1), 300);
+
+    throttle.run();
+    throttle.run();
+    expect(calls.length).toBe(1);
+
+    throttle.cancel();
+    vi.advanceTimersByTime(1000);
+    expect(calls.length).toBe(1);
+    vi.useRealTimers();
+  });
 });

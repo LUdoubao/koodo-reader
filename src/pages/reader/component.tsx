@@ -43,7 +43,7 @@ import { useAppStore } from "../../store/useAppStore";
 import {
   isCoarsePointer,
   resolveIsTouch,
-  useLayoutMode,
+  useLayout,
 } from "../../utils/hooks/useLayoutMode";
 import MobileSheetClose from "../../components/mobileSheetClose";
 
@@ -123,7 +123,7 @@ const Reader = () => {
   const handleFetchUserInfo = useAppStore((s) => s.handleFetchUserInfo);
   const handleBackgroundColor = useAppStore((s) => s.handleBackgroundColor);
   const { t } = useTranslation();
-  const { layout } = useLayoutMode();
+  const { layout } = useLayout();
   const currentProps = {
     t,
     currentBook,

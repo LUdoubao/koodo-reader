@@ -7,12 +7,9 @@ import Login from "../pages/login";
 import Stats from "../pages/stats";
 import HtmlReader from "../pages/reader";
 import _Redirect from "../pages/redirect";
-import { useLayoutMode } from "../utils/hooks/useLayoutMode";
+import { LayoutProvider } from "../utils/hooks/useLayoutMode";
 
 const Router = () => {
-  // Writes data-layout on <html> for every route, so CSS and JS share one
-  // breakpoint fact source.
-  useLayoutMode();
   useEffect(() => {
     const lng = ConfigService.getReaderConfig("lang");
 
@@ -148,41 +145,43 @@ const Router = () => {
   }, []);
   return (
     <HashRouter>
-      <Routes>
-        <Route element={<Manager />} path="/manager/*" />
-        <Route element={<Login />} path="/login" />
-        <Route element={<Stats />} path="/stats" />
-        <Route element={<HtmlReader />} path="/epub/*" />
-        <Route element={<HtmlReader />} path="/mobi/*" />
-        <Route element={<HtmlReader />} path="/cbr/*" />
-        <Route element={<HtmlReader />} path="/cbt/*" />
-        <Route element={<HtmlReader />} path="/cbz/*" />
-        <Route element={<HtmlReader />} path="/cb7/*" />
-        <Route element={<HtmlReader />} path="/pptx/*" />
-        <Route element={<HtmlReader />} path="/ppt/*" />
-        <Route element={<HtmlReader />} path="/xps/*" />
-        <Route element={<HtmlReader />} path="/oxps/*" />
-        <Route element={<HtmlReader />} path="/djvu/*" />
-        <Route element={<HtmlReader />} path="/djv/*" />
-        <Route element={<HtmlReader />} path="/ofd/*" />
-        <Route element={<HtmlReader />} path="/azw3/*" />
-        <Route element={<HtmlReader />} path="/azw/*" />
-        <Route element={<HtmlReader />} path="/txt/*" />
-        <Route element={<HtmlReader />} path="/docx/*" />
-        <Route element={<HtmlReader />} path="/doc/*" />
-        <Route element={<HtmlReader />} path="/rtf/*" />
-        <Route element={<HtmlReader />} path="/md/*" />
-        <Route element={<HtmlReader />} path="/fb2/*" />
-        <Route element={<HtmlReader />} path="/chm/*" />
-        <Route element={<HtmlReader />} path="/html/*" />
-        <Route element={<HtmlReader />} path="/htm/*" />
-        <Route element={<HtmlReader />} path="/xml/*" />
-        <Route element={<HtmlReader />} path="/xhtml/*" />
-        <Route element={<HtmlReader />} path="/mhtml/*" />
-        <Route element={<HtmlReader />} path="/href/*" />
-        <Route element={<HtmlReader />} path="/pdf/*" />
-        <Route element={<_Redirect />} path="/" />
-      </Routes>
+      <LayoutProvider>
+        <Routes>
+          <Route element={<Manager />} path="/manager/*" />
+          <Route element={<Login />} path="/login" />
+          <Route element={<Stats />} path="/stats" />
+          <Route element={<HtmlReader />} path="/epub/*" />
+          <Route element={<HtmlReader />} path="/mobi/*" />
+          <Route element={<HtmlReader />} path="/cbr/*" />
+          <Route element={<HtmlReader />} path="/cbt/*" />
+          <Route element={<HtmlReader />} path="/cbz/*" />
+          <Route element={<HtmlReader />} path="/cb7/*" />
+          <Route element={<HtmlReader />} path="/pptx/*" />
+          <Route element={<HtmlReader />} path="/ppt/*" />
+          <Route element={<HtmlReader />} path="/xps/*" />
+          <Route element={<HtmlReader />} path="/oxps/*" />
+          <Route element={<HtmlReader />} path="/djvu/*" />
+          <Route element={<HtmlReader />} path="/djv/*" />
+          <Route element={<HtmlReader />} path="/ofd/*" />
+          <Route element={<HtmlReader />} path="/azw3/*" />
+          <Route element={<HtmlReader />} path="/azw/*" />
+          <Route element={<HtmlReader />} path="/txt/*" />
+          <Route element={<HtmlReader />} path="/docx/*" />
+          <Route element={<HtmlReader />} path="/doc/*" />
+          <Route element={<HtmlReader />} path="/rtf/*" />
+          <Route element={<HtmlReader />} path="/md/*" />
+          <Route element={<HtmlReader />} path="/fb2/*" />
+          <Route element={<HtmlReader />} path="/chm/*" />
+          <Route element={<HtmlReader />} path="/html/*" />
+          <Route element={<HtmlReader />} path="/htm/*" />
+          <Route element={<HtmlReader />} path="/xml/*" />
+          <Route element={<HtmlReader />} path="/xhtml/*" />
+          <Route element={<HtmlReader />} path="/mhtml/*" />
+          <Route element={<HtmlReader />} path="/href/*" />
+          <Route element={<HtmlReader />} path="/pdf/*" />
+          <Route element={<_Redirect />} path="/" />
+        </Routes>
+      </LayoutProvider>
     </HashRouter>
   );
 };

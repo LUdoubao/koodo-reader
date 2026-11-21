@@ -1,5 +1,10 @@
 /* mobile: layout fact source for shell, lists, reader and dialogs */
-import { useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 /**
  * Mirrors RESIZE_THROTTLE_MS from utils/common.ts. This module stays free of
@@ -7,11 +12,20 @@ import { useEffect, useState } from "react";
  */
 const RESIZE_THROTTLE_MS = 300;
 
+export interface ResizeThrottle {
+  run: () => void;
+  /** Drops a pending trailing call; used when the owning component unmounts. */
+  cancel: () => void;
+}
+
 /** Leading + trailing throttle, matching utils/common.ts behaviour. */
-function throttleResize(handler: () => void, wait: number): () => void {
+export function createResizeThrottle(
+  handler: () => void,
+  wait: number
+): ResizeThrottle {
   let timer: ReturnType<typeof setTimeout> | null = null;
   let lastCall = 0;
-  return () => {
+  const run = () => {
     const now = Date.now();
     const remaining = wait - (now - lastCall);
     if (remaining <= 0) {
@@ -27,6 +41,13 @@ function throttleResize(handler: () => void, wait: number): () => void {
       }, remaining);
     }
   };
+  const cancel = () => {
+    if (timer !== null) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  };
+  return { run, cancel };
 }
 
 export type LayoutMode = "mobile" | "desktop";
@@ -177,7 +198,8 @@ export function useLayoutMode(): LayoutSnapshot {
         return next;
       });
     };
-    const handleResize = throttleResize(sync, RESIZE_THROTTLE_MS);
+    const resizer = createResizeThrottle(sync, RESIZE_THROTTLE_MS);
+    const handleResize = resizer.run;
     const pointerQuery = window.matchMedia?.("(pointer: coarse)");
 
     window.addEventListener("resize", handleResize);
@@ -187,6 +209,9 @@ export function useLayoutMode(): LayoutSnapshot {
     sync();
 
     return () => {
+      // Drop the queued trailing call first: after unmount it would still run
+      // measure() against a dead instance.
+      resizer.cancel();
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleResize);
       window.visualViewport?.removeEventListener("resize", handleResize);
@@ -199,4 +224,33 @@ export function useLayoutMode(): LayoutSnapshot {
   }, [snapshot]);
 
   return snapshot;
+}
+
+const LayoutContext = createContext<LayoutSnapshot | null>(null);
+
+let fallbackSnapshot: LayoutSnapshot | null = null;
+
+function resolveFallbackSnapshot(): LayoutSnapshot {
+  if (fallbackSnapshot === null) fallbackSnapshot = measure();
+  return fallbackSnapshot;
+}
+
+/**
+ * Mounts the one layout listener set for the whole app. Consumers read the
+ * result through useLayout() instead of subscribing individually, so a list of
+ * N cards no longer registers N sets of global listeners.
+ */
+export const LayoutProvider: React.FC<{ children: React.ReactNode }> = (
+  props
+) =>
+  React.createElement(
+    LayoutContext.Provider,
+    { value: useLayoutMode() },
+    props.children
+  );
+
+/** Shared layout fact; outside a provider it degrades to a static measurement. */
+export function useLayout(): LayoutSnapshot {
+  const fromProvider = useContext(LayoutContext);
+  return fromProvider ?? resolveFallbackSnapshot();
 }

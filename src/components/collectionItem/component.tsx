@@ -11,7 +11,7 @@ import {
   CONTEXT_MENU_WIDTH,
 } from "../../utils/common";
 import { useAppStore } from "../../store/useAppStore";
-import { useLayoutMode } from "../../utils/hooks/useLayoutMode";
+import { useLayout } from "../../utils/hooks/useLayoutMode";
 import { useLongPress } from "../../utils/hooks/useLongPress";
 
 import CollectionModel from "../../models/Collection";
@@ -28,7 +28,8 @@ export interface CollectionItemProps {
 declare var window: any;
 
 const CollectionItem: React.FC<CollectionItemProps> = (props) => {
-  const { layout } = useLayoutMode();
+  // Cards read the shell-level fact instead of subscribing per instance.
+  const { layout } = useLayout();
   const isOpenActionDialog = useAppStore((s) => s.book.isOpenActionDialog);
   const currentBook = useAppStore((s) => s.book.currentBook);
   const isSelectBook = useAppStore((s) => s.manager.isSelectBook);

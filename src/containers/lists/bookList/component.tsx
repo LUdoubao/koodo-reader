@@ -22,7 +22,7 @@ import { throttle } from "../../../utils/common";
 import {
   countPerPage,
   LayoutMode,
-  useLayoutMode,
+  useLayout,
 } from "../../../utils/hooks/useLayoutMode";
 import { useAppStore } from "../../../store/useAppStore";
 
@@ -61,9 +61,11 @@ const BookList = () => {
   const handleFetchBooks = useAppStore((s) => s.handleFetchBooks);
   const handleLoadMore = useAppStore((s) => s.handleLoadMore);
   const handleLocalFileDialog = useAppStore((s) => s.handleLocalFileDialog);
-  const { layout } = useLayoutMode();
+  const { layout } = useLayout();
   const { t } = useTranslation();
   const scrollContainer = useRef<HTMLUListElement | null>(null);
+  // Monotonic load id: only the newest full reload may write the list state.
+  const loadSeqRef = useRef(0);
   const [state, setState] = useState<BookListState>(() => ({
     favoriteBooks: Object.keys(ConfigService.getAllListConfig("favoriteBooks"))
       .length,
@@ -247,6 +249,8 @@ const BookList = () => {
   const loadFullBooksData = async (
     displayedBooksCount = stateRef.current.displayedBooksCount
   ) => {
+    // A newer reload (layout, filter or list change) supersedes this one.
+    const seq = ++loadSeqRef.current;
     const { books } = handleBooks();
     const displayedBooks = books.slice(0, displayedBooksCount);
 
@@ -266,6 +270,7 @@ const BookList = () => {
       }
     }
 
+    if (seq !== loadSeqRef.current) return;
     setState((prevState) => ({ ...prevState, fullBooksData }));
   };
 
@@ -286,6 +291,9 @@ const BookList = () => {
       return;
     }
 
+    // Capture the generation and the paging base this append was computed from;
+    // a reload or a page-size change in between makes the result stale.
+    const seq = loadSeqRef.current;
     setState((prevState) => ({ ...prevState, isLoadingMore: true }));
     handleLoadMore(true);
     setTimeout(async () => {
@@ -313,6 +321,12 @@ const BookList = () => {
         }
       }
 
+      if (
+        seq !== loadSeqRef.current ||
+        stateRef.current.displayedBooksCount !== displayedBooksCount
+      ) {
+        return;
+      }
       setState((prevState) => ({
         ...prevState,
         displayedBooksCount: newDisplayedBooksCount,
