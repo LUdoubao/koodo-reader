@@ -19,6 +19,13 @@ describe("resolveLayout", () => {
     expect(resolveLayout(1440)).toBe("desktop");
   });
 
+  it("keeps a landscape phone on the mobile shell", () => {
+    expect(resolveLayout(844, 390)).toBe("mobile");
+    expect(resolveLayout(932, 430)).toBe("mobile");
+    expect(resolveLayout(844, 1024)).toBe("desktop");
+    expect(resolveLayout(1280, 390)).toBe("desktop");
+  });
+
   it("keeps the breakpoint constant in sync with the CSS width rule", () => {
     expect(MOBILE_MAX_WIDTH).toBe(767);
   });

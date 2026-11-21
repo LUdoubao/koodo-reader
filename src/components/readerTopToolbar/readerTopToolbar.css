@@ -49,21 +49,17 @@
 
 @media (max-width: 360px) {
   [data-layout="mobile"] .reader-quick-buttons:not(.reader-bottom-toolbar) {
-    left: 60px !important;
-    right: 8px !important;
+    left: 56px !important;
+    right: 0 !important;
     width: auto !important;
     max-width: none !important;
     justify-content: flex-start !important;
-    -webkit-mask-image: linear-gradient(
-      to right,
-      #000 calc(100% - 14px),
-      transparent
-    );
-    mask-image: linear-gradient(
-      to right,
-      #000 calc(100% - 14px),
-      transparent
-    );
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+
+  [data-layout="mobile"] [aria-label="AI 问书"] {
+    display: none !important;
   }
 }
 

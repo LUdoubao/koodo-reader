@@ -63,6 +63,9 @@ export interface LayoutSnapshot {
 
 /** Mobile layout applies at or below this CSS width; desktop starts at 768px. */
 export const MOBILE_MAX_WIDTH = 767;
+/** A phone held sideways is wider than 767px but still a phone shell. */
+export const LANDSCAPE_MOBILE_MAX_WIDTH = 1000;
+export const LANDSCAPE_MOBILE_MAX_HEIGHT = 500;
 /** Session-only escape hatch used by QA and emergency rollback. */
 export const LAYOUT_OVERRIDE_KEY = "koodo-layout-override";
 export const LAYOUT_PARAM = "layout";
@@ -72,8 +75,20 @@ export function isLayoutMode(value: unknown): value is LayoutMode {
 }
 
 /** Pure breakpoint rule; exported so tests can cover the 767/768 boundary. */
-export function resolveLayout(width: number): LayoutMode {
-  return width <= MOBILE_MAX_WIDTH ? "mobile" : "desktop";
+export function resolveLayout(
+  width: number,
+  height: number = Number.POSITIVE_INFINITY
+): LayoutMode {
+  if (width <= MOBILE_MAX_WIDTH) return "mobile";
+  // 844×390 / 932×430 phones report a desktop width; keep the phone shell
+  // instead of squeezing the reader into two 299px side panels.
+  if (
+    width <= LANDSCAPE_MOBILE_MAX_WIDTH &&
+    height <= LANDSCAPE_MOBILE_MAX_HEIGHT
+  ) {
+    return "mobile";
+  }
+  return "desktop";
 }
 
 /**
@@ -159,7 +174,7 @@ function measure(): LayoutSnapshot {
   );
   persistOverride(override);
   return {
-    layout: override ?? resolveLayout(width),
+    layout: override ?? resolveLayout(width, height),
     width,
     height,
     isTouch: isCoarsePointer(),

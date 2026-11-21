@@ -314,9 +314,14 @@
 
 [data-layout="mobile"] .navigation-search-box,
 [data-layout="mobile"] .header-search-box {
-  width: min(220px, calc(100% - 30px)) !important;
   height: 44px !important;
   box-sizing: border-box;
+}
+
+/* 320px: the header keeps 115px of book metadata to the left, so a fixed 220px
+   search would run 15px past the viewport. */
+[data-layout="mobile"] .navigation-search-box {
+  width: min(220px, calc(100vw - 130px)) !important;
 }
 
 [data-layout="mobile"] .navigation-search-box .header-search-box {
@@ -348,4 +353,41 @@
 [data-layout="mobile"] .navigation-body-parent {
   top: 150px;
   height: calc(100% - 198px - var(--safe-bottom));
+}
+
+/* touch tablets (768px portrait still uses the desktop split shell): desktop
+   controls are 33-35px tall, below the 44px touch minimum. 1280px+ keeps the
+   denser mouse layout. */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .navigation-search-box .header-search-box {
+    height: 44px !important;
+  }
+
+  .navigation-navigation .book-content-title,
+  .navigation-navigation .book-bookmark-title {
+    min-height: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    flex: 1 1 0;
+    max-width: none;
+    min-width: 44px;
+    margin: 0;
+  }
+
+  .nav-close-icon {
+    width: 44px;
+    height: 44px;
+    right: 4px;
+    top: 4px;
+  }
+
+  .nav-lock-icon {
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }

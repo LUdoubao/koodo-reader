@@ -144,6 +144,26 @@
   margin: 0;
   background: transparent;
   margin-top: 2px;
+  height: 24px;
+}
+
+/* Desktop keeps the same 4px track + visible thumb as the mobile bar; the
+   bare 2px input made the progress control look like a hairline. */
+.reader-bottom-toolbar input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, currentColor 25%, transparent);
+}
+
+.reader-bottom-toolbar input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  background: var(--app-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .reader-bottom-toolbar #jumpPage,
