@@ -221,7 +221,7 @@
 [data-layout="mobile"] .view-area-page,
 [data-layout="mobile"] .html-viewer-page {
   top: calc(76px + var(--safe-top));
-  bottom: calc(64px + var(--safe-bottom));
+  bottom: calc(72px + var(--safe-bottom));
 }
 
 /* mobile: the engine centres the text column at 60% of the viewport, which
