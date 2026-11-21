@@ -250,6 +250,18 @@
   margin-right: auto;
 }
 
+/* 空书库时搜索无意义，原位显示导入入口，保证首次使用就能导入图书 */
+[data-layout="mobile"] .mobile-import-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  font-size: 22px;
+  cursor: pointer;
+}
+
 [data-layout="mobile"] .header-search-container {
   display: none;
 }

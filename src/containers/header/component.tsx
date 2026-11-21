@@ -49,6 +49,7 @@ import i18n from "../../i18n";
 import { getNotification } from "../../utils/request/common";
 import TokenService from "../../utils/storage/tokenService";
 import { useAppStore } from "../../store/useAppStore";
+import { useLayout } from "../../utils/hooks/useLayoutMode";
 
 export interface HeaderProps {
   handleDrag: (isDrag: boolean) => void;
@@ -67,6 +68,11 @@ declare var window: any;
 
 const Header = (props: HeaderProps) => {
   const isCollapsed = useAppStore((s) => s.sidebar.isCollapsed);
+  const books = useAppStore((s) => s.manager.books);
+  const { layout } = useLayout();
+  /** 空书库时移动端没有任何导入入口，用顶栏导入按钮替代无意义的搜索按钮 */
+  const isMobileEmptyLibrary =
+    layout === "mobile" && (books?.length ?? 0) === 0;
   const handleMobileDrawer = useAppStore((s) => s.handleMobileDrawer);
   const currentBook = useAppStore((s) => s.book.currentBook);
   const isAuthed = useAppStore((s) => s.manager.isAuthed);
@@ -785,16 +791,36 @@ const Header = (props: HeaderProps) => {
       >
         <span className="icon-menu"></span>
       </div>
-      <div
-        className="mobile-search-toggle"
-        role="button"
-        aria-label={t("Search")}
-        onClick={() => {
-          setPartialState({ isMobileSearchOpen: true });
-        }}
-      >
-        <span className="icon-search"></span>
-      </div>
+      {isMobileEmptyLibrary ? (
+        <div
+          className="mobile-import-button"
+          role="button"
+          aria-label={t("Import")}
+          onClick={() => {
+            const input = document.querySelector<HTMLInputElement>(
+              "#import-book-box"
+            );
+            if (input) {
+              input.click();
+              return;
+            }
+            handleLocalFileDialog(true);
+          }}
+        >
+          <span className="icon-import"></span>
+        </div>
+      ) : (
+        <div
+          className="mobile-search-toggle"
+          role="button"
+          aria-label={t("Search")}
+          onClick={() => {
+            setPartialState({ isMobileSearchOpen: true });
+          }}
+        >
+          <span className="icon-search"></span>
+        </div>
+      )}
       {isAuthed && (
         <div
           className="header-chat-widget"
