@@ -129,3 +129,58 @@
   right: 10px;
   cursor: pointer;
 }
+
+/* mobile: 44px settings tabs, theme chips, colour dots and sliders */
+[data-layout="mobile"] .setting-panel-tabs {
+  height: 50px;
+}
+
+[data-layout="mobile"] .setting-panel-tab {
+  height: 44px;
+  line-height: 44px;
+}
+
+[data-layout="mobile"] .setting-panel-tabs-indicator {
+  top: 3px;
+  bottom: 3px;
+}
+
+[data-layout="mobile"] .preset-theme-item {
+  height: 44px;
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .background-color-circle {
+  width: 44px;
+  height: 44px;
+  margin: 2px;
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .setting-panel-menu {
+  display: none;
+}
+
+[data-layout="mobile"] .setting-panel input[type="range"] {
+  height: 44px;
+}
+
+[data-layout="mobile"]
+  .setting-panel
+  input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, currentColor 25%, transparent);
+}
+
+[data-layout="mobile"]
+  .setting-panel
+  input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -9px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  background: var(--app-bg);
+}
