@@ -27,32 +27,24 @@
 }
 
 [data-layout="mobile"] .setting-dialog-sidebar {
-  width: 100%;
+  /* Stop the strip short of the fixed close button instead of letting tabs
+     scroll underneath it: an overlay only hid the label visually, taps on the
+     fourth tab still landed on the close button and dismissed the sheet. */
+  width: calc(100% - var(--tap-min) - 8px);
   min-width: 0;
   height: 56px;
   flex: 0 0 56px;
   flex-direction: row;
   align-items: center;
-  padding: 4px 56px 4px 8px;
+  padding: 4px 8px;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   gap: 2px;
-  /* The strip scrolls under the fixed close button in the top-right corner;
-     fade the last 56px so a scrolled tab label never sits visibly behind the
-     icon, and let the trailing padding end the strip inside the opaque zone. */
-  -webkit-mask-image: linear-gradient(
-    to right,
-    #000 0,
-    #000 calc(100% - 56px),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to right,
-    #000 0,
-    #000 calc(100% - 56px),
-    transparent 100%
-  );
+  box-sizing: border-box;
+  /* Soften the clipped edge of the next tab without covering the close button. */
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 16px), transparent 100%);
 }
 
 [data-layout="mobile"] .setting-dialog-sidebar-title,
