@@ -650,7 +650,16 @@ const BookList = () => {
             role="button"
             aria-label={t("Import")}
             onClick={() => {
-              handleLocalFileDialog(true);
+              // The header's local-import entry is hidden on mobile, so this
+              // button reuses its hidden file input instead of opening the
+              // desktop folder-picker dialog.
+              const importInput =
+                document.querySelector<HTMLInputElement>("#import-book-box");
+              if (importInput) {
+                importInput.click();
+              } else {
+                handleLocalFileDialog(true);
+              }
             }}
           >
             <span className="icon-add"></span>

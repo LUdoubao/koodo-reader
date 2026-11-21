@@ -34,12 +34,39 @@ export function useLongPress(
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startRef = useRef({ x: 0, y: 0 });
   const firedRef = useRef(false);
+  const swallowRef = useRef<(() => void) | null>(null);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+  }, []);
+
+  // 长按结束后系统仍会补发一次 click。菜单是卡片的兄弟节点，卡片上的
+  // onClickCapture 拦不到这次 click，可能直接激活菜单首项，所以改在
+  // document 捕获阶段吞掉紧随其后的那一次 click。
+  const swallowFollowingClick = useCallback(() => {
+    if (swallowRef.current) {
+      swallowRef.current();
+      swallowRef.current = null;
+    }
+    let released = false;
+    const release = () => {
+      if (released) return;
+      released = true;
+      document.removeEventListener("click", onClick, true);
+      clearTimeout(fallback);
+      if (swallowRef.current === release) swallowRef.current = null;
+    };
+    const onClick = (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      release();
+    };
+    const fallback = setTimeout(release, 400);
+    document.addEventListener("click", onClick, true);
+    swallowRef.current = release;
   }, []);
 
   const onPointerDown = useCallback(
@@ -52,10 +79,11 @@ export function useLongPress(
       timerRef.current = setTimeout(() => {
         timerRef.current = null;
         firedRef.current = true;
+        swallowFollowingClick();
         onLongPress(clientX, clientY);
       }, delay);
     },
-    [clearTimer, delay, onLongPress]
+    [clearTimer, delay, onLongPress, swallowFollowingClick]
   );
 
   const onPointerMove = useCallback(
@@ -82,8 +110,17 @@ export function useLongPress(
   }, []);
 
   // 列表重建（换页、筛选、加载更多）可能在 500ms 内卸载卡片；
-  // 卸载时清掉定时器，避免对已卸载卡片触发长按回调。
-  useEffect(() => clearTimer, [clearTimer]);
+  // 卸载时清掉定时器和吞点击监听，避免对已卸载卡片触发长按回调。
+  useEffect(
+    () => () => {
+      clearTimer();
+      if (swallowRef.current) {
+        swallowRef.current();
+        swallowRef.current = null;
+      }
+    },
+    [clearTimer]
+  );
 
   return {
     onPointerDown,
