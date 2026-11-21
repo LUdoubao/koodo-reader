@@ -37,8 +37,8 @@
   overflow-x: auto;
 }
 
-[data-layout="mobile"] .setting-panel-tabs > * {
-  flex: 0 0 auto;
+[data-layout="mobile"] .setting-panel-tabs > .setting-panel-tab {
+  flex: 1 1 0;
   min-width: var(--tap-min);
 }
 
@@ -163,6 +163,50 @@
 
 [data-layout="mobile"] .setting-panel input[type="range"] {
   height: 44px;
+}
+
+[data-layout="mobile"] .setting-panel select {
+  height: 44px;
+  font-size: 15px;
+}
+
+[data-layout="mobile"] .setting-panel .input-value {
+  height: 44px;
+  min-width: 58px;
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .setting-panel .single-control-switch-container {
+  min-height: 44px;
+  margin: 4px 20px;
+  align-items: center;
+}
+
+[data-layout="mobile"] .setting-panel .single-control-switch {
+  width: 48px;
+  height: 26px;
+  border-radius: 13px;
+  align-items: center;
+}
+
+[data-layout="mobile"] .setting-panel .single-control-button {
+  width: 20px;
+  height: 20px;
+  margin: 3px;
+}
+
+[data-layout="mobile"] .lock-icon {
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 [data-layout="mobile"]
