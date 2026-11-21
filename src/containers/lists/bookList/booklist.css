@@ -203,3 +203,19 @@
   font-size: 24px;
   border-radius: 50%;
 }
+
+/* mobile: view-mode icons were 17px wide, below the 44px touch minimum */
+[data-layout="mobile"] .book-list-view {
+  /* The desktop group is fixed at 100px, which clips three 44px targets. */
+  width: auto !important;
+  gap: 4px;
+  align-items: center;
+}
+
+[data-layout="mobile"] .card-list-mode {
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
