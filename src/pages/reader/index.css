@@ -245,6 +245,7 @@
   max-width: calc(100% - 16px);
   height: 22px;
   align-items: center;
+  justify-content: space-between;
   padding: 0 4px;
   box-sizing: border-box;
   font-size: 12px;
@@ -261,6 +262,22 @@
 [data-layout="mobile"] .header-container > :first-child {
   opacity: 0.95 !important;
   font-weight: 500;
+}
+
+[data-layout="mobile"] .header-container .header-chapter-name {
+  width: auto !important;
+  max-width: 58%;
+  margin: 0 !important;
+  left: auto !important;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-layout="mobile"] .header-container .footer-time {
+  right: 4px !important;
+  left: auto !important;
+  white-space: nowrap;
 }
 
 /* mobile: the in-page footer duplicates the always-on bottom toolbar. */
