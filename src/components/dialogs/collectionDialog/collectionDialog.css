@@ -15,11 +15,15 @@
 
 /* mobile: fit the viewport and allow inner scrolling */
 [data-layout="mobile"] .collection-dialog-container {
-  width: calc(100vw - var(--dialog-inset-y));
+  width: calc(100vw - var(--dialog-inset-x) * 2);
   height: auto;
-  max-height: calc(var(--app-height, 100dvh) - var(--dialog-inset-y));
+  max-height: calc(
+    var(--app-height, 100dvh) - var(--shell-header-total) -
+      var(--dialog-inset-x) * 2
+  );
   left: var(--dialog-inset-x);
-  top: 12px;
+  /* 顶栏是固定定位且层级更高，弹窗必须从顶栏下方开始，标题才不会被图标压住 */
+  top: calc(var(--shell-header-total) + var(--dialog-inset-x));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
