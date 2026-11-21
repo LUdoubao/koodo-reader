@@ -8,6 +8,9 @@ FROM caddy:latest
 # Copy pre-built website files (built by CI runner, platform-independent)
 COPY build/ /usr/share/caddy
 
+# Custom Caddyfile: static site plus the /baidu-api relay to the Go service
+COPY Caddyfile /etc/caddy/Caddyfile
+
 # Copy pre-compiled Go binary for the target platform
 ARG TARGETARCH
 COPY httpserver/httpserver-linux-${TARGETARCH} /app/httpserver
@@ -34,6 +37,10 @@ ENV SERVER_PASSWORD_FILE=my_secret
 ENV ENABLE_KOREADER_SERVER=false
 ENV ENABLE_KOREADER_REGISTRATION=true
 ENV ENABLE_OPDS=false
+# Baidu Netdisk relay (Web import): disabled unless every required value is set.
+ENV BAIDU_APP_KEY=
+ENV BAIDU_REDIRECT_URI=
+ENV BAIDU_APP_NAME=koodo-reader
 
 # Define volume for uploads directory
 VOLUME ["/app/uploads"]

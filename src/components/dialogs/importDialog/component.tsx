@@ -1,6 +1,6 @@
 import { useLatest } from "../../../utils/hooks/useLatest";
 import { useTranslation } from "react-i18next";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./importDialog.css";
 import { driveList } from "../../../constants/driveList";
 import { Trans } from "react-i18next";
@@ -22,6 +22,15 @@ import {
   SyncUtil,
 } from "../../../assets/lib/kookit-extra-browser.min";
 import { GooglePickerUtil } from "../../../utils/file/googlePicker";
+import {
+  BaiduApiError,
+  disconnectBaidu,
+  downloadBaiduBook,
+  getBaiduStatus,
+  isSupportedBookFile,
+  listBaiduFiles,
+  startBaiduAuth,
+} from "../../../utils/request/baidu";
 
 export interface ImportDialogState {
   currentDrive: string;
@@ -32,6 +41,7 @@ export interface ImportDialogState {
     type: string;
     modified: string;
     path: string;
+    fsid?: string;
   }[];
   selectedFileList: {
     name: string;
@@ -39,6 +49,7 @@ export interface ImportDialogState {
     type: string;
     modified: string;
     path: string;
+    fsid?: string;
   }[];
   isWaitList: boolean;
 }
@@ -50,6 +61,8 @@ type FileInfo = {
   type: string;
   modified: string;
   path: string;
+  /** Baidu Netdisk file id, kept as a string because fs_id is a uint64. */
+  fsid?: string;
 };
 
 const ImportDialog = () => {
@@ -70,6 +83,41 @@ const ImportDialog = () => {
   }));
   const googlePickerUtil = useRef<any>(null);
   const stateRef = useLatest(state);
+  // Guards the Baidu folder list against stale responses: only the newest
+  // request may write currentFileList, so a slow reply for folder A cannot
+  // overwrite folder B after the user already navigated away.
+  const baiduListSeq = useRef(0);
+  // Baidu downloads stream through the relay; a double click on Import would
+  // start the same downloads twice. Other sources keep their existing
+  // behaviour, which is out of this change's scope.
+  const baiduImportingRef = useRef(false);
+  // Baidu Netdisk is a same-origin relay, not one of the driveList providers:
+  // it is probed on mount and only rendered when the server is configured.
+  const [baidu, setBaidu] = useState<{
+    enabled: boolean;
+    authorized: boolean;
+  }>({ enabled: false, authorized: false });
+
+  useEffect(() => {
+    if (isElectron) {
+      return;
+    }
+    let cancelled = false;
+    getBaiduStatus()
+      .then((status) => {
+        if (!cancelled) {
+          setBaidu({ enabled: status.enabled, authorized: status.authorized });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setBaidu({ enabled: false, authorized: false });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleClose = () => {
     handleImportDialog(false);
@@ -109,6 +157,37 @@ const ImportDialog = () => {
   };
   const listFolder = async (drive: string, path: string) => {
     setState((prev) => ({ ...prev, isWaitList: true }));
+    if (drive === "baidu") {
+      // Baidu is served by /baidu-api, not by SyncService: it has no cloud
+      // config and no picker, so it returns before getCloudConfig is reached.
+      const seq = ++baiduListSeq.current;
+      try {
+        const files = await listBaiduFiles(path);
+        if (
+          seq !== baiduListSeq.current ||
+          stateRef.current.currentPath !== path
+        ) {
+          // A newer navigation (or a reset) already took ownership of the list.
+          return;
+        }
+        setState((prev) => ({
+          ...prev,
+          currentFileList: files,
+          isWaitList: false,
+        }));
+      } catch (error) {
+        if (seq !== baiduListSeq.current) {
+          return;
+        }
+        setState((prev) => ({
+          ...prev,
+          currentFileList: [],
+          isWaitList: false,
+        }));
+        handleBaiduError(error);
+      }
+      return;
+    }
     let fileInfoList = [];
     if (isElectron) {
       const ipcRenderer = window.electronAPI;
@@ -130,6 +209,67 @@ const ImportDialog = () => {
       isWaitList: false,
     }));
   };
+  const handleBaiduError = (error: unknown) => {
+    if (error instanceof BaiduApiError && error.code === "reauth_required") {
+      // The refresh token was rejected: drop back to the un-authorized state
+      // and let the next click start a fresh authorization.
+      baiduListSeq.current += 1;
+      setBaidu((prev) => ({ ...prev, authorized: false }));
+      setState((prev) => ({
+        ...prev,
+        currentDrive: "",
+        currentPath: "",
+        currentFileList: [],
+        selectedFileList: [],
+      }));
+      toast.error(t("Baidu Netdisk authorization failed"));
+      return;
+    }
+    toast.error(error instanceof Error ? error.message : String(error));
+  };
+  const handleSelectBaidu = async () => {
+    if (!baidu.enabled) {
+      toast(t("Baidu Netdisk is not configured on this server"));
+      return;
+    }
+    try {
+      if (!baidu.authorized) {
+        toast.loading(t("Authorize Baidu Netdisk"), { id: "baidu-auth" });
+        await startBaiduAuth();
+        toast.dismiss("baidu-auth");
+        setBaidu((prev) => ({ ...prev, authorized: true }));
+      }
+      setState((prev) => ({
+        ...prev,
+        currentDrive: "baidu",
+        currentPath: "",
+        currentFileList: [],
+      }));
+      await listFolder("baidu", "");    } catch (error) {
+      toast.dismiss("baidu-auth");
+      if (error instanceof BaiduApiError) {
+        toast.error(t("Baidu Netdisk authorization failed"));
+        return;
+      }
+      toast.error(error instanceof Error ? error.message : String(error));
+    }
+  };
+  const handleDisconnectBaidu = async () => {
+    try {
+      await disconnectBaidu();
+      baiduListSeq.current += 1;
+      setBaidu((prev) => ({ ...prev, authorized: false }));
+      setState((prev) => ({
+        ...prev,
+        currentDrive: "",
+        currentPath: "",
+        currentFileList: [],
+        selectedFileList: [],
+      }));
+    } catch (error) {
+      handleBaiduError(error);
+    }
+  };
   const handleClickItem = async (item: FileInfo) => {
     if (item.type === "folder") {
       const nextPath = stateRef.current.currentPath + "/" + item.name;
@@ -145,6 +285,12 @@ const ImportDialog = () => {
     }
   };
   const handleImportBook = async (item: FileInfo) => {
+    if (stateRef.current.currentDrive === "baidu") {
+      // Return before getCloudConfig/SyncService so the desktop cloud path is
+      // never touched for a relay source.
+      await handleImportBaiduBook(item);
+      return;
+    }
     let isSupported = supportedFormats.includes(
       "." + item.name.split(".").pop()?.toLowerCase() || ""
     );
@@ -219,6 +365,42 @@ const ImportDialog = () => {
     toast.dismiss("importing");
     await importBookFunc(file);
   };
+  const handleImportBaiduBook = async (item: FileInfo) => {
+    if (!isSupportedBookFile(item.name, supportedFormats)) {
+      toast.error(
+        t("Unsupported file format") + ": " + item.name.split(".").pop()
+      );
+      return;
+    }
+    if (!item.fsid) {
+      toast.error(t("Unsupported file format") + ": " + item.name);
+      return;
+    }
+    toast.loading(t("Downloading"), {
+      id: "offline-book-import",
+      position: "bottom-center",
+    });
+    try {
+      // The relay streams the bytes and reports progress; the server re-checks
+      // path, format and size, so this layer only drives the UI.
+      const file = await downloadBaiduBook({
+        fsid: item.fsid,
+        name: item.name,
+        size: item.size,
+        onProgress: (percent) => {
+          toast.loading(t("Downloading") + " " + percent + "%", {
+            id: "offline-book-import",
+            position: "bottom-center",
+          });
+        },
+      });
+      toast.dismiss("offline-book-import");
+      await importBookFunc(file);
+    } catch (error) {
+      toast.dismiss("offline-book-import");
+      handleBaiduError(error);
+    }
+  };
   const listAllFilesRecursively = async (folderName: string) => {
     toast.loading(t("Scanning folder"), {
       id: "scanning",
@@ -268,7 +450,10 @@ const ImportDialog = () => {
     try {
       let fileInfoList: FileInfo[] = [];
 
-      if (isElectron) {
+      if (stateRef.current.currentDrive === "baidu") {
+        // Recursive folder import walks the relay one folder at a time.
+        fileInfoList = await listBaiduFiles(folderPath);
+      } else if (isElectron) {
         const ipcRenderer = window.electronAPI;
         let tokenConfig = await getCloudConfig(stateRef.current.currentDrive);
         fileInfoList = await ipcRenderer.invoke("picker-list", {
@@ -299,11 +484,18 @@ const ImportDialog = () => {
         }
       }
     } catch (error) {
-      toast.error(
-        "Error listing files in folder: " +
-          (error instanceof Error ? error.message : String(error))
-      );
-      console.error("Error listing files in folder:", error);
+      if (stateRef.current.currentDrive === "baidu") {
+        // A recursive scan hitting a dead refresh token must reset the
+        // authorization state too, otherwise the dialog keeps claiming to be
+        // connected and every retry fails with the same 401.
+        handleBaiduError(error);
+      } else {
+        toast.error(
+          "Error listing files in folder: " +
+            (error instanceof Error ? error.message : String(error))
+        );
+        console.error("Error listing files in folder:", error);
+      }
     }
 
     return allFiles;
@@ -410,6 +602,32 @@ const ImportDialog = () => {
       <div className="import-dialog-option">
         {state.currentDrive === "" && (
           <>
+            {baidu.enabled && (
+              // Rendered separately from driveList on purpose: adding Baidu to
+              // the 18-provider list would also change the sync settings page.
+              <div key="baidu" className="cloud-drive-item">
+                <span className="cloud-drive-label" onClick={handleSelectBaidu}>
+                  {t("Baidu Netdisk")}
+                </span>
+                {baidu.authorized ? (
+                  <span
+                    className="cloud-drive-label"
+                    style={{ maxWidth: "80px" }}
+                    onClick={async (event) => {
+                      event.stopPropagation();
+                      await handleDisconnectBaidu();
+                    }}
+                  >
+                    {t("Disconnect")}
+                  </span>
+                ) : (
+                  <span
+                    className="icon-dropdown import-dialog-more-file"
+                    onClick={handleSelectBaidu}
+                  ></span>
+                )}
+              </div>
+            )}
             {driveList
               .filter(
                 (item) =>
@@ -570,7 +788,9 @@ const ImportDialog = () => {
           state.currentFileList.length === 0 &&
           !state.isWaitList && (
             <div className="loading-animation" style={{ height: "100%" }}>
-              {t("Empty")}
+              {state.currentDrive === "baidu"
+                ? t("No books found in this folder")
+                : t("Empty")}
             </div>
           )}
       </div>
@@ -582,15 +802,29 @@ const ImportDialog = () => {
             toast.error(t("No file selected"));
             return;
           }
-          for (let i = 0; i < state.selectedFileList.length; i++) {
-            let fileInfo = state.selectedFileList[i];
-
-            await handleImportBook(fileInfo);
+          const isBaiduImport = state.currentDrive === "baidu";
+          if (isBaiduImport && baiduImportingRef.current) {
+            // Ignore a second click while the first batch is still downloading.
+            return;
           }
-          setState((prev) => ({
-            ...prev,
-            selectedFileList: [],
-          }));
+          if (isBaiduImport) {
+            baiduImportingRef.current = true;
+          }
+          try {
+            for (let i = 0; i < state.selectedFileList.length; i++) {
+              let fileInfo = state.selectedFileList[i];
+
+              await handleImportBook(fileInfo);
+            }
+            setState((prev) => ({
+              ...prev,
+              selectedFileList: [],
+            }));
+          } finally {
+            if (isBaiduImport) {
+              baiduImportingRef.current = false;
+            }
+          }
         }}
       >
         {t("Import") + " (" + state.selectedFileList.length + ")"}

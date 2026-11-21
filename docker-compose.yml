@@ -16,6 +16,15 @@ services:
       # 这里填的是在默认基础上额外允许的 Origin（例如自建网页版本身）。
       # 示例：ALLOWED_ORIGINS=https://reader.example.com
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-}
+      # 百度网盘导入（Web 端）。三项必填，缺一项则入口隐藏；
+      # 回调地址必须与百度开放平台登记的地址完全一致（路径固定为 /baidu-api/callback）。
+      # 建议用 docker secret 提供 BAIDU_SECRET_KEY（默认 secret 名 baidu_secret），
+      # 否则可用下面注释的 BAIDU_SECRET_KEY 环境变量。
+      # - BAIDU_APP_KEY=${BAIDU_APP_KEY:-}
+      # - BAIDU_SECRET_KEY=${BAIDU_SECRET_KEY:-}
+      # - BAIDU_REDIRECT_URI=${BAIDU_REDIRECT_URI:-}
+      # - BAIDU_APP_NAME=${BAIDU_APP_NAME:-koodo-reader}
+      # - BAIDU_MAX_FILE_MB=${BAIDU_MAX_FILE_MB:-200}
     volumes:
       # 使用主机目录（推荐）
       - /opt/uploads:/app/uploads

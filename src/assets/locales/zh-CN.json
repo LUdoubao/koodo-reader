@@ -1214,5 +1214,11 @@
   "ISBN": "ISBN",
   "Enable auto reading": "自动阅读",
   "Auto scrolling speed": "自动阅读速度",
-  "Text to speech": "朗读"
+  "Text to speech": "朗读",
+  "Baidu Netdisk": "百度网盘",
+  "Authorize Baidu Netdisk": "授权百度网盘",
+  "Baidu Netdisk authorization failed": "百度网盘授权失败",
+  "Baidu Netdisk is not configured on this server": "此服务器未配置百度网盘",
+  "No books found in this folder": "此文件夹没有找到书籍",
+  "Disconnect": "断开连接"
 }

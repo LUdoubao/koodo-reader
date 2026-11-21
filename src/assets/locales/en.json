@@ -1223,5 +1223,11 @@
   "Write in HTML": "Write in HTML",
   "Priority support": "Priority support",
   "Unlock Pro features on all Platform": "Unlock Pro features on all Platform",
-  "No path found for this book": "No path found for this book"
+  "No path found for this book": "No path found for this book",
+  "Baidu Netdisk": "Baidu Netdisk",
+  "Authorize Baidu Netdisk": "Authorize Baidu Netdisk",
+  "Baidu Netdisk authorization failed": "Baidu Netdisk authorization failed",
+  "Baidu Netdisk is not configured on this server": "Baidu Netdisk is not configured on this server",
+  "No books found in this folder": "No books found in this folder",
+  "Disconnect": "Disconnect"
 }

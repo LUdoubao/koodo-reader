@@ -493,6 +493,15 @@ func sortFileList(list []fileEntry) {
 // ── Router ────────────────────────────────────────────────────────────────────
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	// Baidu relay is a browser-facing same-origin API: it must run before the
+	// Basic Auth and CORS gates, otherwise the OAuth redirect and the
+	// streaming download could never reach the Go service. Only the exact
+	// prefix (or /baidu-api itself) bypasses auth; look-alike paths do not.
+	if r.URL.Path == baiduAPIPrefix || strings.HasPrefix(r.URL.Path, baiduAPIPrefix+"/") {
+		baiduAPIHandler(w, r)
+		return
+	}
+
 	origin := r.Header.Get("Origin")
 	serverOrigin := getServerOrigin(r)
 	isCrossOrigin := origin != "" && origin != serverOrigin
@@ -544,11 +553,12 @@ func main() {
 	// Initialise KOReader sync server (reads env, opens DB if enabled).
 	initKoreader()
 
-	if !serverEnabled && !koreaderEnabled {
+	if !serverEnabled && !koreaderEnabled && !baiduEnabled {
 		log.Println("All servers are disabled.")
 		log.Println("  Set ENABLE_HTTP_SERVER=true  to enable the file server.")
 		log.Println("  Set ENABLE_KOREADER_SERVER=true to enable the KOReader sync server.")
 		log.Println("  Set ENABLE_OPDS=true to enable the OPDS catalog (requires ENABLE_HTTP_SERVER=true).")
+		log.Println("  Set BAIDU_APP_KEY and the other BAIDU_* variables to enable the Baidu Netdisk relay.")
 		os.Exit(0)
 	}
 
@@ -565,14 +575,18 @@ func main() {
 		go startKoreaderServer()
 	}
 
-	// Start the main file server if enabled.
-	if serverEnabled {
+	// Start the main file server if enabled. The Baidu relay shares this
+	// listener, so it also starts the server when the file server is off.
+	if serverEnabled || baiduEnabled {
 		addr := ":" + port
 		log.Printf("Secure File Server running at http://localhost%s", addr)
 		log.Printf("Username: %s", credentials.username)
 		log.Println("Password: [HIDDEN FOR SECURITY]")
 		if opdsEnabled {
 			log.Printf("OPDS catalog available at http://localhost%s/opds", addr)
+		}
+		if baiduEnabled {
+			log.Printf("Baidu Netdisk relay available at http://localhost%s%s", addr, baiduAPIPrefix)
 		}
 
 		srv := &http.Server{

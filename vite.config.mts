@@ -28,6 +28,15 @@ export default defineConfig(({ command }) => ({
     port: 3000,
     host: "127.0.0.1",
     strictPort: false,
+    // Development only: the Baidu relay is a same-origin API in production
+    // (Caddy proxies /baidu-api). Keep changeOrigin false so the Go service
+    // sees the browser's Host/Origin and its same-origin check still passes.
+    proxy: {
+      "/baidu-api": {
+        target: "http://127.0.0.1:8080",
+        changeOrigin: false,
+      },
+    },
     warmup: {
       clientFiles: [
         "./src/index.tsx",

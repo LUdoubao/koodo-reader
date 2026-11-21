@@ -1,0 +1,23 @@
+# Koodo Reader web image: static site plus the Baidu Netdisk relay.
+#
+# Caddy serves the built SPA and forwards /baidu-api to the Go service on
+# 127.0.0.1:8080. The relay is a same-origin dependency of the import dialog:
+# tokens stay in HttpOnly cookies scoped to /baidu-api.
+:80 {
+	root * /usr/share/caddy
+	encode gzip
+
+	# Baidu Netdisk relay. Response buffering is disabled so the browser sees
+	# download progress while the Go service streams the file (R-6).
+	handle /baidu-api/* {
+		reverse_proxy 127.0.0.1:8080 {
+			flush_interval -1
+		}
+	}
+
+	# Single page application: unknown paths fall back to index.html.
+	handle {
+		try_files {path} {path}/ /index.html
+		file_server
+	}
+}
