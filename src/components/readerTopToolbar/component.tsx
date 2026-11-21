@@ -15,6 +15,7 @@ import {
 } from "../../utils/common";
 import { useAppStore } from "../../store/useAppStore";
 import WindowControls from "../windowControls";
+import { useLayout } from "../../utils/hooks/useLayoutMode";
 
 export interface ReaderTopToolbarProps {
   isNearEdge: boolean;
@@ -43,6 +44,8 @@ const NO_DRAG_REGION_STYLE = {
 } as React.CSSProperties;
 
 const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
+  const { layout } = useLayout();
+  const isMobileLayout = layout === "mobile";
   const currentBook = useAppStore((s) => s.book.currentBook);
   const htmlBook = useAppStore((s) => s.reader.htmlBook);
   const readerMode = useAppStore((s) => s.reader.readerMode);
@@ -506,12 +509,35 @@ const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
               ></span>
             </div>
           )}
+          {isMobileLayout && (
+            // The desktop toolbar has no settings entry of its own; mobile needs
+            // one because both panels are full-screen sheets and cannot be
+            // stacked the way the desktop docked panels are.
+            <div
+              className="reader-setting-icon-container reader-toolbar-mobile-settings"
+              aria-label={t("Setting")}
+              onClick={() => {
+                props.handleEnterReader("right");
+              }}
+            >
+              <span
+                className="icon-setting reader-setting-icon"
+                style={{ fontSize: 18 }}
+              ></span>
+            </div>
+          )}
           <div
             className="reader-setting-icon-container"
             aria-label={t("Toggle menu")}
             data-tooltip-id="my-tooltip"
             data-tooltip-content={t("Toggle menu")}
             onClick={() => {
+              // Mobile panels replace the page one at a time, so the catalog
+              // button opens the navigation sheet only.
+              if (isMobileLayout) {
+                props.handleEnterReader("left");
+                return;
+              }
               props.handleEnterReader("left");
               props.handleEnterReader("right");
             }}

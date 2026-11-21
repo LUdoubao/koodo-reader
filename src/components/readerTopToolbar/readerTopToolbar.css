@@ -1,5 +1,7 @@
-/* mobile: top toolbar compaction and touch target sizing */
-[data-layout="mobile"] .reader-quick-buttons {
+/* mobile: top toolbar compaction and touch target sizing.
+   The bottom toolbar reuses .reader-quick-buttons for shared icon styling, so
+   this block only targets the top strip. */
+[data-layout="mobile"] .reader-quick-buttons:not(.reader-bottom-toolbar) {
   top: calc(var(--safe-top)) !important;
   right: 8px !important;
   max-width: calc(100vw - 16px) !important;
@@ -40,3 +42,4 @@
 [data-layout="mobile"] .reader-toolbar-fullscreen {
   display: none !important;
 }
+

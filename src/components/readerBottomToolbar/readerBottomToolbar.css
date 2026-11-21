@@ -183,6 +183,10 @@
 [data-layout="mobile"] .reader-bottom-toolbar {
   padding-bottom: var(--safe-bottom);
   box-sizing: border-box;
+  /* The desktop bar spans the docked-panel gutters; on mobile it hugs the
+     viewport width and keeps its own bottom edge. */
+  left: 8px;
+  right: 8px;
 }
 
 [data-layout="mobile"] .reader-bottom-toolbar-info {

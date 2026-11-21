@@ -216,9 +216,20 @@
   left: 0;
 }
 
-[data-layout="mobile"] .view-area-page {
-  top: calc(28px + var(--safe-top));
-  bottom: calc(25px + var(--safe-bottom));
+/* mobile: the toolbars stay on screen, so the text column is inset to clear
+   them instead of the 28/25px desktop insets. */
+[data-layout="mobile"] .view-area-page,
+[data-layout="mobile"] .html-viewer-page {
+  top: calc(48px + var(--safe-top));
+  bottom: calc(60px + var(--safe-bottom));
+}
+
+/* mobile: the in-page header/footer chrome duplicates the always-on toolbars
+   and would otherwise show through them. */
+[data-layout="mobile"] .header-container,
+[data-layout="mobile"] .footer-container {
+  opacity: 0;
+  pointer-events: none;
 }
 
 [data-layout="mobile"] .reader-window-drag-region {

@@ -704,6 +704,10 @@ const Reader = () => {
   const isMergeWord = ConfigService.getReaderConfig("isMergeWord") === "yes";
   const isUndockedPopupBoxOpen =
     !isDockedRight && isOpenMenu && POPUP_BOX_MODES.includes(menuMode);
+  // Touch devices have no hover, so the edge-hover reveal never fires a second
+  // time after the 1.5s auto-show. Keep the bars visible for the whole session.
+  const isToolbarVisible =
+    (layout === "mobile" || state.isNearEdge) && !isUndockedPopupBoxOpen;
   const renditionProps = {
     handleLeaveReader: handleLeaveReader,
     handleEnterReader: handleEnterReader,
@@ -719,7 +723,7 @@ const Reader = () => {
       )}
 
       <ReaderTopToolbar
-        isNearEdge={state.isNearEdge && !isUndockedPopupBoxOpen}
+        isNearEdge={isToolbarVisible}
         currentDuration={state.currentDuration}
         isMacOS={isMacOS}
         isMergeWord={isMergeWord}
@@ -732,7 +736,7 @@ const Reader = () => {
       />
 
       <ReaderBottomToolbar
-        isNearEdge={state.isNearEdge && !isUndockedPopupBoxOpen}
+        isNearEdge={isToolbarVisible}
         showQuickButtons={showQuickButtons}
         hideQuickButtons={hideQuickButtons}
       />
