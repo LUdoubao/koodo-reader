@@ -196,8 +196,32 @@
   box-sizing: border-box;
   /* The desktop bar spans the docked-panel gutters; on mobile it hugs the
      viewport width and keeps its own bottom edge. */
-  left: 8px;
-  right: 8px;
+  left: 8px !important;
+  right: 8px !important;
+}
+
+[data-layout="mobile"] .reader-bottom-toolbar .previous-chapter,
+[data-layout="mobile"] .reader-bottom-toolbar .next-chapter {
+  transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+[data-layout="mobile"] .reader-bottom-toolbar .previous-chapter:active {
+  background-color: color-mix(in srgb, currentColor 12%, transparent);
+  transform: rotate(90deg) scale(0.9);
+}
+
+[data-layout="mobile"] .reader-bottom-toolbar .next-chapter:active {
+  background-color: color-mix(in srgb, currentColor 12%, transparent);
+  transform: rotate(-90deg) scale(0.9);
+}
+
+[data-layout="mobile"]
+  .reader-bottom-toolbar
+  .previous-chapter.previous-chapter-double:active,
+[data-layout="mobile"]
+  .reader-bottom-toolbar
+  .next-chapter.next-chapter-double:active {
+  transform: scale(0.9);
 }
 
 [data-layout="mobile"] .reader-bottom-toolbar input[type="range"] {

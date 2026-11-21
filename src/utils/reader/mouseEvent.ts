@@ -397,6 +397,21 @@ const gesture = async (rendition: any, type: string) => {
   }
 };
 
+// 触屏翻页手势的最小位移与方向判定。Hammer 默认的 pan 阈值很小，
+// 手指轻微抖动（十几像素）也会被识别成翻页，阅读时很容易误触。
+const MIN_SWIPE_DISTANCE = 48;
+const MIN_SWIPE_RATIO = 1.2;
+const isDeliberateSwipe = (event: any) => {
+  if (!event || typeof event.distance !== "number") return false;
+  if (event.distance < MIN_SWIPE_DISTANCE) return false;
+  const absX = Math.abs(event.deltaX || 0);
+  const absY = Math.abs(event.deltaY || 0);
+  if (event.type === "panleft" || event.type === "panright") {
+    return absX >= absY * MIN_SWIPE_RATIO;
+  }
+  return absY >= absX * MIN_SWIPE_RATIO;
+};
+
 const handleLocation = (key: string, rendition: any) => {
   let position = rendition.getPosition();
   ConfigService.setObjectConfig(key, position, "recordLocation");
@@ -522,8 +537,12 @@ export const bindHtmlEvent = (
         return;
       }
       if (event.pointerType === "mouse") return;
+      // 长按选词/拖动选区时不翻页，避免手势抢走文本选择
+      if (getSelection(book)) return;
+      if (!isDeliberateSwipe(event)) return;
       await gesture(rendition, event.type);
       handleLocation(key, rendition);
+      useAppStore.getState().handleFetchPercentage(book);
     });
   }
 

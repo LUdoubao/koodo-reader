@@ -134,6 +134,7 @@ const ReaderBottomToolbar = (props: ReaderBottomToolbarProps) => {
       await htmlBook.rendition.prev();
     }
     handleSaveLocation();
+    handleFetchPercentage(currentBook);
     setTimeout(() => (lock = false), throttleTime);
   };
 
@@ -146,6 +147,7 @@ const ReaderBottomToolbar = (props: ReaderBottomToolbarProps) => {
       await htmlBook.rendition.next();
     }
     handleSaveLocation();
+    handleFetchPercentage(currentBook);
     setTimeout(() => (lock = false), throttleTime);
   };
 

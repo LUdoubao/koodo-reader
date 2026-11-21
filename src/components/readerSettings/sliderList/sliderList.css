@@ -76,3 +76,13 @@
 [data-layout="mobile"] .font-size-selector {
   height: 44px;
 }
+
+/* 字号/亮度滑块的 44px 输入框必须落在 44px 容器内，不能沿用桌面
+   inline 的 bottom:11px，否则会向上溢出压住标题行并抢占触摸。 */
+[data-layout="mobile"] .font-size-selector input[type="range"] {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: auto !important;
+  width: 100% !important;
+  height: 44px;
+}
