@@ -304,6 +304,12 @@
   flex: 1 1 0;
   max-width: none;
   min-width: 44px;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+[data-layout="mobile"] .navigation-navigation .book-bookmark-title:active {
+  color: var(--color-theme-color, #0179ca);
+  background: color-mix(in srgb, currentColor 10%, transparent);
 }
 
 [data-layout="mobile"] .navigation-search-box,
@@ -320,6 +326,10 @@
 [data-layout="mobile"] .header-search-text {
   width: calc(100% - 34px) !important;
   height: 44px !important;
+}
+
+[data-layout="mobile"] .header-search-text:active {
+  opacity: 0.55;
 }
 
 [data-layout="mobile"] .book-content-header .book-content-expand {
