@@ -7,6 +7,7 @@ import { Trans } from "react-i18next";
 import { useAppStore } from "../../../store/useAppStore";
 import toast from "react-hot-toast";
 import { isElectron } from "react-device-detect";
+import { useLayout } from "../../../utils/hooks/useLayoutMode";
 import { getCloudConfig } from "../../../utils/file/common";
 import SyncService from "../../../utils/storage/syncService";
 import {
@@ -70,10 +71,12 @@ const ImportDialog = () => {
   const dataSourceList = useAppStore((s) => s.backupPage.dataSourceList);
   const importBookFunc = useAppStore((s) => s.book.importBookFunc);
   const handleImportDialog = useAppStore((s) => s.handleImportDialog);
+  const handleLocalFileDialog = useAppStore((s) => s.handleLocalFileDialog);
   const handleSetting = useAppStore((s) => s.handleSetting);
   const handleSettingMode = useAppStore((s) => s.handleSettingMode);
   const handleSettingDrive = useAppStore((s) => s.handleSettingDrive);
   const { t } = useTranslation();
+  const { layout } = useLayout();
   const [state, setState] = useState<ImportDialogState>(() => ({
     currentDrive: "",
     currentPath: "",
@@ -93,10 +96,14 @@ const ImportDialog = () => {
   const baiduImportingRef = useRef(false);
   // Baidu Netdisk is a same-origin relay, not one of the driveList providers:
   // it is probed on mount and only rendered when the server is configured.
+  // `checked` records that the probe finished, so the mobile source picker can
+  // keep the row visible even when the server is not configured and explain it
+  // on click instead of silently hiding the entry.
   const [baidu, setBaidu] = useState<{
     enabled: boolean;
     authorized: boolean;
-  }>({ enabled: false, authorized: false });
+    checked: boolean;
+  }>({ enabled: false, authorized: false, checked: false });
 
   useEffect(() => {
     if (isElectron) {
@@ -106,12 +113,16 @@ const ImportDialog = () => {
     getBaiduStatus()
       .then((status) => {
         if (!cancelled) {
-          setBaidu({ enabled: status.enabled, authorized: status.authorized });
+          setBaidu({
+            enabled: status.enabled,
+            authorized: status.authorized,
+            checked: true,
+          });
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setBaidu({ enabled: false, authorized: false });
+          setBaidu({ enabled: false, authorized: false, checked: true });
         }
       });
     return () => {
@@ -226,6 +237,19 @@ const ImportDialog = () => {
       return;
     }
     toast.error(error instanceof Error ? error.message : String(error));
+  };
+  const handleSelectLocal = () => {
+    // Close the sheet and click the hidden input in the same event: awaiting or
+    // deferring here would drop user activation and the browser would refuse
+    // to open the file chooser.
+    handleImportDialog(false);
+    const importInput =
+      document.querySelector<HTMLElement>("#import-book-box");
+    if (importInput) {
+      importInput.click();
+    } else {
+      handleLocalFileDialog(true);
+    }
   };
   const handleSelectBaidu = async () => {
     if (!baidu.enabled) {
@@ -591,23 +615,41 @@ const ImportDialog = () => {
     }
   };
 
+  const isMobileSourcePicker = layout === "mobile" && state.currentDrive === "";
+
   return (
     <div
       className="backup-page-container"
-      style={{ height: "450px", top: "calc(50% - 225px)" }}
+      style={
+        layout === "mobile"
+          ? undefined
+          : { height: "450px", top: "calc(50% - 225px)" }
+      }
     >
       <div className="backup-dialog-title">
-        <Trans>From cloud storage</Trans>
+        {layout === "mobile" ? t("Import") : <Trans>From cloud storage</Trans>}
       </div>
       <div className="import-dialog-option">
         {state.currentDrive === "" && (
           <>
-            {baidu.enabled && (
+            {layout === "mobile" && (
+              // The desktop local-import dropdown is hidden on mobile, so the
+              // sheet itself offers local storage next to the cloud sources.
+              <div key="local" className="cloud-drive-item">
+                <span className="cloud-drive-label" onClick={handleSelectLocal}>
+                  {t("From local storage")}
+                </span>
+                <span className="icon-dropdown import-dialog-more-file"></span>
+              </div>
+            )}
+            {(baidu.enabled || (layout === "mobile" && baidu.checked)) && (
               // Rendered separately from driveList on purpose: adding Baidu to
               // the 18-provider list would also change the sync settings page.
               <div key="baidu" className="cloud-drive-item">
                 <span className="cloud-drive-label" onClick={handleSelectBaidu}>
-                  {t("Baidu Netdisk")}
+                  {layout === "mobile"
+                    ? t("Import from Baidu Netdisk")
+                    : t("Baidu Netdisk")}
                 </span>
                 {baidu.authorized ? (
                   <span
@@ -796,59 +838,68 @@ const ImportDialog = () => {
             </div>
           )}
       </div>
-      <div
-        className="import-dialog-back-button"
-        style={{ left: "20px", color: "rgb(231, 69, 69)" }}
-        onClick={async () => {
-          if (state.selectedFileList.length === 0) {
-            toast.error(t("No file selected"));
-            return;
-          }
-          const isBaiduImport = state.currentDrive === "baidu";
-          if (isBaiduImport && baiduImportingRef.current) {
-            // Ignore a second click while the first batch is still downloading.
-            return;
-          }
-          if (isBaiduImport) {
-            baiduImportingRef.current = true;
-          }
-          try {
-            for (let i = 0; i < state.selectedFileList.length; i++) {
-              let fileInfo = state.selectedFileList[i];
+      {/* The mobile source picker has nothing to import or navigate back to,
+          so the root-level actions stay hidden until a source is chosen. */}
+      {!isMobileSourcePicker && (
+        <>
+          <div
+            className="import-dialog-back-button"
+            style={{ left: "20px", color: "rgb(231, 69, 69)" }}
+            onClick={async () => {
+              if (state.selectedFileList.length === 0) {
+                toast.error(t("No file selected"));
+                return;
+              }
+              const isBaiduImport = state.currentDrive === "baidu";
+              if (isBaiduImport && baiduImportingRef.current) {
+                // Ignore a second click while the first batch is still downloading.
+                return;
+              }
+              if (isBaiduImport) {
+                baiduImportingRef.current = true;
+              }
+              try {
+                for (let i = 0; i < state.selectedFileList.length; i++) {
+                  let fileInfo = state.selectedFileList[i];
 
-              await handleImportBook(fileInfo);
-            }
-            setState((prev) => ({
-              ...prev,
-              selectedFileList: [],
-            }));
-          } finally {
-            if (isBaiduImport) {
-              baiduImportingRef.current = false;
-            }
-          }
-        }}
-      >
-        {t("Import") + " (" + state.selectedFileList.length + ")"}
-      </div>
-      <div
-        className="import-dialog-back-button"
-        onClick={async () => {
-          if (state.currentPath === "") {
-            setState((prev) => ({
-              ...prev,
-              currentDrive: "",
-              currentFileList: [],
-            }));
-            return;
-          }
-          let parentPath = state.currentPath.split("/").slice(0, -1).join("/");
-          setState((prev) => ({ ...prev, currentPath: parentPath }));
-          listFolder(state.currentDrive, parentPath);
-        }}
-      >
-        {t("Back to parent")}
-      </div>
+                  await handleImportBook(fileInfo);
+                }
+                setState((prev) => ({
+                  ...prev,
+                  selectedFileList: [],
+                }));
+              } finally {
+                if (isBaiduImport) {
+                  baiduImportingRef.current = false;
+                }
+              }
+            }}
+          >
+            {t("Import") + " (" + state.selectedFileList.length + ")"}
+          </div>
+          <div
+            className="import-dialog-back-button"
+            onClick={async () => {
+              if (state.currentPath === "") {
+                setState((prev) => ({
+                  ...prev,
+                  currentDrive: "",
+                  currentFileList: [],
+                }));
+                return;
+              }
+              let parentPath = state.currentPath
+                .split("/")
+                .slice(0, -1)
+                .join("/");
+              setState((prev) => ({ ...prev, currentPath: parentPath }));
+              listFolder(state.currentDrive, parentPath);
+            }}
+          >
+            {t("Back to parent")}
+          </div>
+        </>
+      )}
 
       <div
         className="backup-page-close-icon"

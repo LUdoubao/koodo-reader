@@ -60,7 +60,7 @@ const BookList = () => {
   const viewMode = useAppStore((s) => s.manager.viewMode);
   const handleFetchBooks = useAppStore((s) => s.handleFetchBooks);
   const handleLoadMore = useAppStore((s) => s.handleLoadMore);
-  const handleLocalFileDialog = useAppStore((s) => s.handleLocalFileDialog);
+  const handleImportDialog = useAppStore((s) => s.handleImportDialog);
   const { layout } = useLayout();
   const { t } = useTranslation();
   const scrollContainer = useRef<HTMLUListElement | null>(null);
@@ -650,16 +650,9 @@ const BookList = () => {
             role="button"
             aria-label={t("Import")}
             onClick={() => {
-              // The header's local-import entry is hidden on mobile, so this
-              // button reuses its hidden file input instead of opening the
-              // desktop folder-picker dialog.
-              const importInput =
-                document.querySelector<HTMLInputElement>("#import-book-box");
-              if (importInput) {
-                importInput.click();
-              } else {
-                handleLocalFileDialog(true);
-              }
+              // Open the shared source picker instead of jumping straight to
+              // the local file input, so mobile users can reach Baidu Netdisk.
+              handleImportDialog(true);
             }}
           >
             <span className="icon-add"></span>

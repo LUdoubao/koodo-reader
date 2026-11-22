@@ -16,6 +16,41 @@
   gap: 4px;
   padding: 4px 0;
 }
+
+/* mobile: full-screen source picker must sit above the header (20) and the
+   list action bar (12), otherwise the top/bottom controls hide its own title,
+   close button and actions. */
+[data-layout="mobile"] .backup-page-container {
+  z-index: 40;
+  background: var(--panel-bg, #fff);
+}
+
+[data-layout="mobile"] .backup-dialog-title {
+  top: calc(var(--safe-top) + 18px);
+}
+
+[data-layout="mobile"] .import-dialog-option {
+  top: calc(var(--safe-top) + 52px);
+  bottom: calc(var(--safe-bottom) + 50px);
+}
+
+[data-layout="mobile"] .backup-page-close-icon {
+  top: calc(var(--safe-top) + 8px);
+  right: 8px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-layout="mobile"] .import-dialog-back-button {
+  bottom: calc(var(--safe-bottom) + 16px);
+}
+
+[data-layout="mobile"] .cloud-drive-item .import-dialog-more-file {
+  font-size: 16px;
+}
 .import-dialog-folder-button {
   display: flex;
   align-items: center;

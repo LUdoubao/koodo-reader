@@ -81,6 +81,7 @@ const Header = (props: HeaderProps) => {
   const isSortDisplay = useAppStore((s) => s.manager.isSortDisplay);
   const handleSortDisplay = useAppStore((s) => s.handleSortDisplay);
   const handleLocalFileDialog = useAppStore((s) => s.handleLocalFileDialog);
+  const handleImportDialog = useAppStore((s) => s.handleImportDialog);
   const handleSetting = useAppStore((s) => s.handleSetting);
   const handleSettingMode = useAppStore((s) => s.handleSettingMode);
   const handleAbout = useAppStore((s) => s.handleAbout);
@@ -797,14 +798,9 @@ const Header = (props: HeaderProps) => {
           role="button"
           aria-label={t("Import")}
           onClick={() => {
-            const input = document.querySelector<HTMLInputElement>(
-              "#import-book-box"
-            );
-            if (input) {
-              input.click();
-              return;
-            }
-            handleLocalFileDialog(true);
+            // An empty library has no bottom action bar, so this header button
+            // opens the same source picker and can reach Baidu Netdisk too.
+            handleImportDialog(true);
           }}
         >
           <span className="icon-import"></span>
