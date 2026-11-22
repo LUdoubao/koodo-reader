@@ -6,6 +6,25 @@
   z-index: 10;
   overflow-x: hidden;
 }
+
+/* mobile: full-screen navigation panel */
+[data-layout="mobile"] .navigation-panel {
+  width: 100%;
+  height: 100%;
+}
+[data-layout="mobile"] .navigation-header {
+  position: static;
+  width: 100%;
+  height: auto;
+  min-height: 150px;
+  padding-top: var(--safe-top);
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .nav-close-icon {
+  /* The shared mobile sheet close button already covers this corner. */
+  display: none;
+}
 .book-cover {
   float: left;
   width: 91px;
@@ -258,4 +277,117 @@
   background: var(--color-hover, rgba(128, 128, 128, 0.05));
   border-left: 3px solid var(--color-theme-color, #0179ca);
   padding-left: 5px;
+}
+
+/* mobile: 44px chapter rows, tabs, search and header/body rhythm */
+[data-layout="mobile"] .book-content-list {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+[data-layout="mobile"] .navigation-navigation {
+  height: calc(48px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .navigation-navigation .book-content-title,
+[data-layout="mobile"] .navigation-navigation .book-bookmark-title {
+  min-height: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  max-width: none;
+  min-width: 44px;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+[data-layout="mobile"] .navigation-navigation .book-bookmark-title:active {
+  color: var(--color-theme-color, #0179ca);
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+[data-layout="mobile"] .navigation-search-box,
+[data-layout="mobile"] .header-search-box {
+  height: 44px !important;
+  box-sizing: border-box;
+}
+
+/* 320px: the header keeps 115px of book metadata to the left, so a fixed 220px
+   search would run 15px past the viewport. */
+[data-layout="mobile"] .navigation-search-box {
+  width: min(220px, calc(100vw - 130px)) !important;
+}
+
+[data-layout="mobile"] .navigation-search-box .header-search-box {
+  width: 100% !important;
+}
+
+[data-layout="mobile"] .header-search-text {
+  width: calc(100% - 34px) !important;
+  height: 44px !important;
+}
+
+[data-layout="mobile"] .header-search-text:active {
+  opacity: 0.55;
+}
+
+[data-layout="mobile"] .book-content-header .book-content-expand {
+  min-height: 44px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .nav-lock-icon {
+  display: none;
+}
+
+[data-layout="mobile"] .navigation-body-parent {
+  top: 150px;
+  height: calc(100% - 198px - var(--safe-bottom));
+}
+
+/* touch tablets (768px portrait still uses the desktop split shell): desktop
+   controls are 33-35px tall, below the 44px touch minimum. 1280px+ keeps the
+   denser mouse layout. */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .navigation-search-box .header-search-box {
+    height: 44px !important;
+  }
+
+  .navigation-navigation .book-content-title,
+  .navigation-navigation .book-bookmark-title {
+    min-height: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    flex: 1 1 0;
+    max-width: none;
+    min-width: 44px;
+    margin: 0;
+  }
+
+  .nav-close-icon {
+    width: 44px;
+    height: 44px;
+    right: 4px;
+    top: 4px;
+  }
+
+  .nav-lock-icon {
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }

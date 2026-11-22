@@ -6,6 +6,22 @@
   position: relative;
   cursor: grab;
 }
+
+/* mobile: three columns per row with a fixed 104px card */
+[data-layout="mobile"] .book-list-item {
+  width: calc(100% / 3);
+  cursor: pointer;
+}
+
+[data-layout="mobile"] .book-item-cover {
+  width: 104px;
+  margin: 10px auto 5px;
+}
+
+[data-layout="mobile"] .book-item-title {
+  width: 92%;
+  margin-left: 4%;
+}
 .book-list-item:active {
   cursor: grabbing;
 }

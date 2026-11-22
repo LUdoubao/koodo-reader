@@ -165,7 +165,7 @@ const PopupBox = (props: PopupBoxProps) => {
     }
   };
 
-  const handleResizeStart = (e: React.MouseEvent) => {
+  const handleResizeStart = (e: React.MouseEvent | React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
     isResizing.current = true;
@@ -177,7 +177,7 @@ const PopupBox = (props: PopupBoxProps) => {
     };
   };
 
-  const handleResizeMove = (e: MouseEvent) => {
+  const handleResizeMove = (e: { clientX: number; clientY: number }) => {
     if (!isResizing.current) return;
     // Dragging top-right corner: right edge extends right (+dx), top edge moves up (-dy means bigger height)
     const dx = e.clientX - resizeStart.current.x;
@@ -187,7 +187,7 @@ const PopupBox = (props: PopupBoxProps) => {
     updateState({ popupWidth: newWidth, popupHeight: newHeight });
   };
 
-  const handleResizeEnd = (_e: MouseEvent) => {
+  const handleResizeEnd = (_e: { clientX: number; clientY: number }) => {
     if (!isResizing.current) return;
     isResizing.current = false;
     // Persist the size without the temporary preview expansion, so
@@ -198,7 +198,7 @@ const PopupBox = (props: PopupBoxProps) => {
     );
   };
 
-  const handleDragStart = (e: React.MouseEvent) => {
+  const handleDragStart = (e: React.MouseEvent | React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (stateRef.current.isDockedRight) {
@@ -244,7 +244,7 @@ const PopupBox = (props: PopupBoxProps) => {
     };
   };
 
-  const handleDragMove = (e: MouseEvent) => {
+  const handleDragMove = (e: { clientX: number; clientY: number }) => {
     if (!isDragging.current) return;
     const dx = e.clientX - dragStart.current.x;
     const dy = e.clientY - dragStart.current.y;
@@ -273,7 +273,7 @@ const PopupBox = (props: PopupBoxProps) => {
     });
   };
 
-  const handleDragEnd = (_e: MouseEvent) => {
+  const handleDragEnd = (_e: { clientX: number; clientY: number }) => {
     if (!isDragging.current) return;
     isDragging.current = false;
     let { popupLeft, popupBottom, popupWidth } = stateRef.current;
@@ -416,12 +416,30 @@ const PopupBox = (props: PopupBoxProps) => {
     document.addEventListener("mousemove", handleDragMove);
     document.addEventListener("mouseup", handleResizeEnd);
     document.addEventListener("mouseup", handleDragEnd);
+    // Touch/pen path: document pointer listeners keep tracking outside the
+    // handle. Mouse pointers are skipped here and stay on the mouse path.
+    const handlePointerMove = (event: PointerEvent) => {
+      if (event.pointerType === "mouse") return;
+      handleResizeMove(event);
+      handleDragMove(event);
+    };
+    const handlePointerUp = (event: PointerEvent) => {
+      if (event.pointerType === "mouse") return;
+      handleResizeEnd(event);
+      handleDragEnd(event);
+    };
+    document.addEventListener("pointermove", handlePointerMove);
+    document.addEventListener("pointerup", handlePointerUp);
+    document.addEventListener("pointercancel", handlePointerUp);
 
     return () => {
       document.removeEventListener("mousemove", handleResizeMove);
       document.removeEventListener("mousemove", handleDragMove);
       document.removeEventListener("mouseup", handleResizeEnd);
       document.removeEventListener("mouseup", handleDragEnd);
+      document.removeEventListener("pointermove", handlePointerMove);
+      document.removeEventListener("pointerup", handlePointerUp);
+      document.removeEventListener("pointercancel", handlePointerUp);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -530,15 +548,18 @@ const PopupBox = (props: PopupBoxProps) => {
           <span
             className={`icon-menu popup-drag-handle ${isDockedRight ? "" : "popup-close"}`}
             onMouseDown={handleDragStart}
+            onPointerDown={handleDragStart}
             title={t("Move")}
             style={
               isDockedRight
                 ? {
                     right: "10px",
+                    touchAction: "none",
                   }
                 : {
                     top: "-30px",
                     right: "10px",
+                    touchAction: "none",
                   }
             }
           ></span>
@@ -547,7 +568,9 @@ const PopupBox = (props: PopupBoxProps) => {
             <div
               className="popup-resize-handle"
               onMouseDown={handleResizeStart}
+              onPointerDown={handleResizeStart}
               title={t("Resize")}
+              style={{ touchAction: "none" }}
             />
           )}
         </div>

@@ -229,6 +229,7 @@
   "Loading": "Loading",
   "Note": "Note",
   "Page width": "Page width",
+  "Scale page": "Scale page",
   "Preset width": "Preset width",
   "Fit to page": "Fit to page",
   "Hide footer": "Hide footer",
@@ -1229,5 +1230,7 @@
   "Baidu Netdisk authorization failed": "Baidu Netdisk authorization failed",
   "Baidu Netdisk is not configured on this server": "Baidu Netdisk is not configured on this server",
   "No books found in this folder": "No books found in this folder",
-  "Disconnect": "Disconnect"
+  "Disconnect": "Disconnect",
+  "Menu": "Menu",
+  "Close panel": "Close panel"
 }

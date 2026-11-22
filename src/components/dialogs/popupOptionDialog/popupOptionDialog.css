@@ -3,6 +3,11 @@
   padding-right: 15px;
 }
 
+/* mobile: option rows get a full touch target */
+[data-layout="mobile"] .popup-option-dialog-item {
+  min-height: var(--tap-min);
+}
+
 .popup-option-dialog-item-icon {
   width: 28px;
   font-size: 22px;

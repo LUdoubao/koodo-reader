@@ -180,6 +180,8 @@ const initialSidebar = {
   mode: "home",
   shelfTitle: "",
   isCollapsed: ConfigService.getReaderConfig("isCollapsed") === "yes",
+  // Mobile drawer state only; never persisted and never synced.
+  isMobileOpen: false,
 };
 
 const initialBackupPage = {
@@ -281,6 +283,7 @@ export type AppActionName =
   | "handleMenuMode"
   | "handleMergeWord"
   | "handleMode"
+  | "handleMobileDrawer"
   | "handleNavLock"
   | "handleNewDialog"
   | "handleNewWarning"
@@ -1068,6 +1071,8 @@ export const useAppStore = create<AppState>()((set, get) => {
     handleShelf: (shelfTitle: string) => setSidebar({ shelfTitle }),
     handleCollapse: (isCollapsed: boolean) => setSidebar({ isCollapsed }),
     handleMode: (mode: string) => setSidebar({ mode }),
+    handleMobileDrawer: (isMobileOpen: boolean) =>
+      setSidebar({ isMobileOpen }),
 
     // backupPage
     handleLocalFileDialog: (isOpen: boolean) =>

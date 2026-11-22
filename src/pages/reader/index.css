@@ -188,3 +188,155 @@
     display: none !important;
   }
 }
+
+/* mobile: full-screen reading panels with a visible close affordance */
+[data-layout="mobile"] .left-panel,
+[data-layout="mobile"] .right-panel {
+  display: none !important;
+}
+
+[data-layout="mobile"] .setting-panel-container,
+[data-layout="mobile"] .navigation-panel-container {
+  width: 100dvw;
+  max-width: 100%;
+  height: var(--app-height, 100dvh);
+  top: 0;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  box-sizing: border-box;
+  z-index: 35;
+  transition: transform 0.25s ease;
+}
+
+[data-layout="mobile"] .setting-panel-container {
+  right: 0;
+}
+
+[data-layout="mobile"] .navigation-panel-container {
+  left: 0;
+}
+
+/* mobile: the toolbars stay on screen, so the text column is inset to clear
+   them instead of the 28/25px desktop insets. */
+[data-layout="mobile"] .view-area-page,
+[data-layout="mobile"] .html-viewer-page {
+  top: calc(76px + var(--safe-top));
+  bottom: calc(72px + var(--safe-bottom));
+}
+
+/* mobile: the engine centres the text column at 60% of the viewport, which
+   wastes 40% of a phone screen. Keep a small page gutter, but let the saved
+   page-width scale and margin still act on that gutter-sized column. */
+[data-layout="mobile"] .html-viewer-page {
+  width: min(
+    calc(
+      (100% - 16px - var(--reader-page-inset, 0px)) *
+        var(--reader-page-scale, 1)
+    ),
+    calc(100% - 16px)
+  ) !important;
+  max-width: calc(100% - 16px);
+  left: 0 !important;
+  right: 0 !important;
+  margin-inline: auto !important;
+}
+
+/* desktop: the single/scroll engine ignores the saved margin, so apply it to
+   the same 60% baseline and keep the locked side panels unobstructed. */
+[data-layout="desktop"][data-reader-page-margin="on"][data-reader-page-mode="single"]
+  .html-viewer-page,
+[data-layout="desktop"][data-reader-page-margin="on"][data-reader-page-mode="scroll"]
+  .html-viewer-page {
+  width: max(
+    0px,
+    calc(
+      60% * var(--reader-page-scale, 1) - var(--reader-page-inset, 0px) -
+        var(--reader-panel-left, 0px) - var(--reader-panel-right, 0px)
+    )
+  ) !important;
+  max-width: calc(100% - 106px) !important;
+  left: var(--reader-panel-left, 0px) !important;
+  right: var(--reader-panel-right, 0px) !important;
+  margin-inline: auto !important;
+}
+
+[data-layout="desktop"][data-reader-page-margin="on"][data-reader-page-mode="double"]
+  .html-viewer-page {
+  width: max(
+    0px,
+    calc(
+      100% - 80px - var(--reader-page-inset, 0px) -
+        var(--reader-panel-left, 0px) - var(--reader-panel-right, 0px)
+    )
+  ) !important;
+  max-width: none !important;
+  left: var(--reader-panel-left, 0px) !important;
+  right: var(--reader-panel-right, 0px) !important;
+  margin-inline: auto !important;
+}
+
+/* mobile: the in-page header carries chapter title, reading time and progress.
+   The footer would collide with the bottom toolbar, so only the header stays,
+   as a compact status strip between the toolbar and the text. */
+[data-layout="mobile"] .header-container {
+  opacity: 1 !important;
+  pointer-events: none;
+  top: calc(50px + var(--safe-top));
+  left: 8px;
+  right: 8px;
+  width: calc(100% - 16px);
+  max-width: calc(100% - 16px);
+  height: 22px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  box-sizing: border-box;
+  font-size: 12px;
+  line-height: 22px;
+  white-space: nowrap;
+  overflow: hidden;
+  z-index: 4;
+}
+
+[data-layout="mobile"] .header-container > * {
+  opacity: 0.75 !important;
+}
+
+[data-layout="mobile"] .header-container > :first-child {
+  opacity: 0.95 !important;
+  font-weight: 500;
+}
+
+[data-layout="mobile"] .header-container .header-chapter-name {
+  width: auto !important;
+  max-width: 58%;
+  margin: 0 !important;
+  left: auto !important;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-layout="mobile"] .header-container .footer-time {
+  right: 4px !important;
+  left: auto !important;
+  white-space: nowrap;
+}
+
+/* mobile: the in-page footer duplicates the always-on bottom toolbar. */
+[data-layout="mobile"] .footer-container {
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-layout="mobile"] .reader-window-drag-region {
+  display: none;
+}
+
+[data-layout="mobile"] .reader-setting-dialog-anchor {
+  top: calc(56px + var(--safe-top));
+  left: 8px;
+  right: 8px;
+  --reader-dialog-width: min(320px, calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+}

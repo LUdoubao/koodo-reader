@@ -53,3 +53,46 @@
   left: 10vw;
   bottom: 20px;
 }
+
+/* mobile: manager content area clears the fixed header and bottom bar */
+[data-layout="mobile"] .manager {
+  height: var(--app-height, 100dvh);
+  overflow-x: hidden;
+}
+
+/* mobile: empty library page drops its desktop absolute geometry.
+   `.empty-page-container` is positioned at left:203px with a 400px subtitle,
+   which clips to a 187px column on a 390px viewport. */
+[data-layout="mobile"] .empty-page-container {
+  position: static;
+  width: 100%;
+  height: auto;
+  margin-top: var(--shell-header-total);
+  padding: 32px 16px calc(80px + var(--safe-bottom));
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+[data-layout="mobile"] .empty-page-info-container {
+  position: static;
+  padding: 0;
+}
+
+[data-layout="mobile"] .empty-page-info-main {
+  font-size: 20px;
+  line-height: 30px;
+}
+
+[data-layout="mobile"] .empty-page-info-sub {
+  width: auto;
+  max-width: 100%;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+/* The desktop illustration is an 80%-height absolute block; it only covers the
+   copy on a phone, so the mobile empty state keeps text only. */
+[data-layout="mobile"] .empty-page-illustration,
+[data-layout="mobile"] .empty-illustration-container {
+  display: none;
+}

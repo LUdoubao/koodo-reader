@@ -40,6 +40,12 @@ import {
 } from "../../utils/common";
 import { getOuterDoc } from "../../utils/reader/docUtil";
 import { useAppStore } from "../../store/useAppStore";
+import {
+  isCoarsePointer,
+  resolveIsTouch,
+  useLayout,
+} from "../../utils/hooks/useLayoutMode";
+import MobileSheetClose from "../../components/mobileSheetClose";
 
 const QUICK_BUTTON_EDGE_DISTANCE = 40;
 
@@ -96,6 +102,9 @@ const Reader = () => {
   );
   const isSettingLocked = useAppStore((s) => s.reader.isSettingLocked);
   const isDockedRight = useAppStore((s) => s.reader.isDockedRight);
+  const pageScale = useAppStore((s) => s.reader.scale);
+  const pageMargin = useAppStore((s) => s.reader.margin);
+  const isFitPage = useAppStore((s) => s.reader.isFitPage);
   const isSettingOpen = useAppStore((s) => s.manager.isSettingOpen);
   const isOpenMenu = useAppStore((s) => s.viewArea.isOpenMenu);
   const menuMode = useAppStore((s) => s.viewArea.menuMode);
@@ -117,6 +126,35 @@ const Reader = () => {
   const handleFetchUserInfo = useAppStore((s) => s.handleFetchUserInfo);
   const handleBackgroundColor = useAppStore((s) => s.handleBackgroundColor);
   const { t } = useTranslation();
+  const { layout } = useLayout();
+  useEffect(() => {
+    const root = document.documentElement;
+    const parsedScale = Number.parseFloat(pageScale);
+    const parsedMargin = Number.parseFloat(pageMargin);
+    const safeScale =
+      Number.isFinite(parsedScale) && parsedScale > 0 ? parsedScale : 1;
+    const safeMargin = Number.isFinite(parsedMargin) ? parsedMargin : 0;
+    root.style.setProperty("--reader-page-scale", String(safeScale));
+    root.style.setProperty("--reader-page-inset", `${safeMargin * 2}px`);
+    root.style.setProperty(
+      "--reader-panel-left",
+      isNavLocked ? "300px" : "0px"
+    );
+    root.style.setProperty(
+      "--reader-panel-right",
+      isSettingLocked ? "300px" : "0px"
+    );
+    root.dataset.readerPageMargin =
+      safeMargin !== 0 && !isFitPage ? "on" : "off";
+    root.dataset.readerPageMode = readerMode;
+  }, [
+    pageScale,
+    pageMargin,
+    isNavLocked,
+    isSettingLocked,
+    isFitPage,
+    readerMode,
+  ]);
   const currentProps = {
     t,
     currentBook,
@@ -159,7 +197,11 @@ const Reader = () => {
     isOpenRightPanel: isSettingLocked,
     totalDuration: 0,
     currentDuration: 0,
-    isTouch: ConfigService.getReaderConfig("isTouch") === "yes",
+    // Saved yes/no wins; a missing value follows the coarse pointer capability.
+    isTouch: resolveIsTouch(
+      ConfigService.getReaderConfig("isTouch"),
+      isCoarsePointer()
+    ),
     isPreventTrigger:
       ConfigService.getReaderConfig("isPreventTrigger") === "yes",
     isNearEdge: false,
@@ -693,6 +735,10 @@ const Reader = () => {
   const isMergeWord = ConfigService.getReaderConfig("isMergeWord") === "yes";
   const isUndockedPopupBoxOpen =
     !isDockedRight && isOpenMenu && POPUP_BOX_MODES.includes(menuMode);
+  // Touch devices have no hover, so the edge-hover reveal never fires a second
+  // time after the 1.5s auto-show. Keep the bars visible for the whole session.
+  const isToolbarVisible =
+    (layout === "mobile" || state.isNearEdge) && !isUndockedPopupBoxOpen;
   const renditionProps = {
     handleLeaveReader: handleLeaveReader,
     handleEnterReader: handleEnterReader,
@@ -708,7 +754,7 @@ const Reader = () => {
       )}
 
       <ReaderTopToolbar
-        isNearEdge={state.isNearEdge && !isUndockedPopupBoxOpen}
+        isNearEdge={isToolbarVisible}
         currentDuration={state.currentDuration}
         isMacOS={isMacOS}
         isMergeWord={isMergeWord}
@@ -721,7 +767,7 @@ const Reader = () => {
       />
 
       <ReaderBottomToolbar
-        isNearEdge={state.isNearEdge && !isUndockedPopupBoxOpen}
+        isNearEdge={isToolbarVisible}
         showQuickButtons={showQuickButtons}
         hideQuickButtons={hideQuickButtons}
       />
@@ -786,10 +832,19 @@ const Reader = () => {
           state.isOpenRightPanel
             ? {}
             : {
-                transform: "translateX(309px)",
+                transform:
+                  layout === "mobile" ? "translateX(100%)" : "translateX(309px)",
               }
         }
       >
+        {layout === "mobile" && state.isOpenRightPanel && (
+          <MobileSheetClose
+            label={t("Close panel")}
+            onClose={() => {
+              handleLeaveReader("right");
+            }}
+          />
+        )}
         <SettingPanel />
       </div>
       <div
@@ -804,10 +859,21 @@ const Reader = () => {
           state.isOpenLeftPanel
             ? {}
             : {
-                transform: "translateX(-309px)",
+                transform:
+                  layout === "mobile"
+                    ? "translateX(-100%)"
+                    : "translateX(-309px)",
               }
         }
       >
+        {layout === "mobile" && state.isOpenLeftPanel && (
+          <MobileSheetClose
+            label={t("Close panel")}
+            onClose={() => {
+              handleLeaveReader("left");
+            }}
+          />
+        )}
         <NavigationPanel
           {...({
             totalDuration: state.totalDuration,

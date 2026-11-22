@@ -19,6 +19,11 @@ import Book from "../../../models/Book";
 import { isElectron } from "react-device-detect";
 import DatabaseService from "../../../utils/storage/databaseService";
 import { throttle } from "../../../utils/common";
+import {
+  countPerPage,
+  LayoutMode,
+  useLayout,
+} from "../../../utils/hooks/useLayoutMode";
 import { useAppStore } from "../../../store/useAppStore";
 
 export interface BookListState {
@@ -34,18 +39,13 @@ export interface BookListState {
 const collectionUtil = new CollectionUtil(ConfigService);
 declare var window: any;
 let currentBookMode = "home";
-function getBookCountPerPage() {
+function getBookCountPerPage(layout: LayoutMode) {
   const container = document.querySelector(
     ".book-list-container"
   ) as HTMLElement;
-  if (!container) return 24; // fallback
-  const containerWidth = container.clientWidth;
-  const containerHeight = container.clientHeight;
-  const bookWidth = 133;
-  const bookHeight = 201;
-  const columns = Math.max(1, Math.floor(containerWidth / bookWidth));
-  const rows = Math.max(1, Math.floor(containerHeight / bookHeight)) + 2;
-  return columns * rows;
+  // 容器尚未挂载时无尺寸可测，回退到历史桌面页大小，等布局测量后重算。
+  if (!container) return 24;
+  return countPerPage(container.clientWidth, container.clientHeight, layout);
 }
 
 const BookList = () => {
@@ -60,8 +60,12 @@ const BookList = () => {
   const viewMode = useAppStore((s) => s.manager.viewMode);
   const handleFetchBooks = useAppStore((s) => s.handleFetchBooks);
   const handleLoadMore = useAppStore((s) => s.handleLoadMore);
+  const handleLocalFileDialog = useAppStore((s) => s.handleLocalFileDialog);
+  const { layout } = useLayout();
   const { t } = useTranslation();
   const scrollContainer = useRef<HTMLUListElement | null>(null);
+  // Monotonic load id: only the newest full reload may write the list state.
+  const loadSeqRef = useRef(0);
   const [state, setState] = useState<BookListState>(() => ({
     favoriteBooks: Object.keys(ConfigService.getAllListConfig("favoriteBooks"))
       .length,
@@ -245,6 +249,8 @@ const BookList = () => {
   const loadFullBooksData = async (
     displayedBooksCount = stateRef.current.displayedBooksCount
   ) => {
+    // A newer reload (layout, filter or list change) supersedes this one.
+    const seq = ++loadSeqRef.current;
     const { books } = handleBooks();
     const displayedBooks = books.slice(0, displayedBooksCount);
 
@@ -264,6 +270,7 @@ const BookList = () => {
       }
     }
 
+    if (seq !== loadSeqRef.current) return;
     setState((prevState) => ({ ...prevState, fullBooksData }));
   };
 
@@ -284,11 +291,14 @@ const BookList = () => {
       return;
     }
 
+    // Capture the generation and the paging base this append was computed from;
+    // a reload or a page-size change in between makes the result stale.
+    const seq = loadSeqRef.current;
     setState((prevState) => ({ ...prevState, isLoadingMore: true }));
     handleLoadMore(true);
     setTimeout(async () => {
       const newDisplayedBooksCount = Math.min(
-        displayedBooksCount + getBookCountPerPage(),
+        displayedBooksCount + getBookCountPerPage(layout),
         books.length
       );
 
@@ -311,6 +321,12 @@ const BookList = () => {
         }
       }
 
+      if (
+        seq !== loadSeqRef.current ||
+        stateRef.current.displayedBooksCount !== displayedBooksCount
+      ) {
+        return;
+      }
       setState((prevState) => ({
         ...prevState,
         displayedBooksCount: newDisplayedBooksCount,
@@ -339,7 +355,7 @@ const BookList = () => {
   }, []);
 
   useEffect(() => {
-    const displayedBooksCount = getBookCountPerPage();
+    const displayedBooksCount = getBookCountPerPage(layout);
     setState((prevState) => ({
       ...prevState,
       displayedBooksCount,
@@ -416,7 +432,7 @@ const BookList = () => {
       prevProps.mode !== mode ||
       prevProps.shelfTitle !== shelfTitle
     ) {
-      const nextDisplayedBooksCount = getBookCountPerPage();
+      const nextDisplayedBooksCount = getBookCountPerPage(layout);
       setState((prevState) => ({
         ...prevState,
         displayedBooksCount: nextDisplayedBooksCount,
@@ -429,6 +445,21 @@ const BookList = () => {
   }, [books, searchResults, isSearch, mode, shelfTitle]);
 
   const prevReadingStatusFilterRef = useRef(state.readingStatusFilter);
+  const prevLayoutRef = useRef(layout);
+  useEffect(() => {
+    if (prevLayoutRef.current === layout) return;
+    prevLayoutRef.current = layout;
+    // Card metrics change with the breakpoint, so the page size must be
+    // recalculated to avoid an empty tail page.
+    const nextDisplayedBooksCount = getBookCountPerPage(layout);
+    setState((prevState) => ({
+      ...prevState,
+      displayedBooksCount: nextDisplayedBooksCount,
+      isLoadingMore: false,
+    }));
+    loadFullBooksData(nextDisplayedBooksCount);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layout]);
   useEffect(() => {
     const prevReadingStatusFilter = prevReadingStatusFilterRef.current;
     prevReadingStatusFilterRef.current = state.readingStatusFilter;
@@ -545,7 +576,7 @@ const BookList = () => {
           style={isSelectBook ? { display: "none" } : {}}
           className="book-list-header-right"
         >
-          {viewMode === "card" && (
+          {viewMode === "card" && layout === "desktop" && (
             <input
               type="range"
               min="0.6"
@@ -612,6 +643,29 @@ const BookList = () => {
           </ul>
         </div>
       </div>
+      {layout === "mobile" && (
+        <div className="mobile-list-action-bar">
+          <div
+            className="mobile-tap-target mobile-list-import"
+            role="button"
+            aria-label={t("Import")}
+            onClick={() => {
+              // The header's local-import entry is hidden on mobile, so this
+              // button reuses its hidden file input instead of opening the
+              // desktop folder-picker dialog.
+              const importInput =
+                document.querySelector<HTMLInputElement>("#import-book-box");
+              if (importInput) {
+                importInput.click();
+              } else {
+                handleLocalFileDialog(true);
+              }
+            }}
+          >
+            <span className="icon-add"></span>
+          </div>
+        </div>
+      )}
     </>
   );
 };

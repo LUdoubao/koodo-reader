@@ -12,6 +12,83 @@
   display: flex;
   flex-direction: row;
 }
+
+/* mobile: settings sheet stacks the sidebar into one scrollable row */
+[data-layout="mobile"] .setting-dialog-container {
+  width: 100dvw;
+  height: var(--app-height, 100dvh);
+  left: 0;
+  top: 0;
+  border-radius: 0;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  box-sizing: border-box;
+}
+
+[data-layout="mobile"] .setting-dialog-sidebar {
+  /* Stop the strip short of the fixed close button instead of letting tabs
+     scroll underneath it: an overlay only hid the label visually, taps on the
+     fourth tab still landed on the close button and dismissed the sheet. */
+  width: calc(100% - var(--tap-min) - 8px);
+  min-width: 0;
+  height: 56px;
+  flex: 0 0 56px;
+  flex-direction: row;
+  align-items: center;
+  padding: 4px 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  gap: 2px;
+  box-sizing: border-box;
+  /* Soften the clipped edge of the next tab without covering the close button. */
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 16px), transparent 100%);
+}
+
+[data-layout="mobile"] .setting-dialog-sidebar-title,
+[data-layout="mobile"] .setting-dialog-sidebar-divider {
+  display: none;
+}
+
+[data-layout="mobile"] .setting-dialog-sidebar-group {
+  display: contents;
+}
+
+[data-layout="mobile"] .setting-dialog-sidebar-item {
+  flex: 0 0 auto;
+  min-height: var(--tap-min);
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+[data-layout="mobile"] .setting-dialog-main {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+[data-layout="mobile"] .setting-dialog-main-header {
+  display: none;
+}
+
+[data-layout="mobile"] .setting-dialog-info {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+[data-layout="mobile"] .setting-close-container {
+  top: calc(var(--safe-top) + 8px);
+  right: 4px;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 102;
+}
 .setting-dialog-sidebar {
   width: 180px;
   min-width: 180px;

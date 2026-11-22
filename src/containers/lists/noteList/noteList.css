@@ -17,3 +17,30 @@
   justify-content: space-between;
   padding: 10px;
 }
+
+/* mobile: single-column note and highlight list */
+[data-layout="mobile"] .note-list-container-parent {
+  position: static;
+  top: auto;
+  left: auto;
+  width: 100%;
+  height: calc(
+    var(--app-height, 100dvh) - var(--shell-header-total) - var(--shell-panel-bottom)
+  );
+  margin-top: var(--shell-header-total);
+  padding: 0 12px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+[data-layout="mobile"] .note-list-header {
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+[data-layout="mobile"] .note-list-container-parent * {
+  max-width: 100%;
+  word-break: break-word;
+}

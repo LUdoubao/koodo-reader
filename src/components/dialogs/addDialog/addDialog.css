@@ -12,6 +12,21 @@
   flex-direction: column;
   box-sizing: border-box;
 }
+
+/* mobile: width follows the viewport, height grows with content */
+[data-layout="mobile"] .add-dialog-container {
+  width: calc(100vw - var(--dialog-inset-x) * 2);
+  height: auto;
+  max-height: calc(
+    var(--app-height, 100dvh) - var(--shell-header-total) -
+      var(--dialog-inset-x) * 2
+  );
+  left: var(--dialog-inset-x);
+  /* 顶栏是固定定位且层级更高，弹窗必须从顶栏下方开始，标题才不会被图标压住 */
+  top: calc(var(--shell-header-total) + var(--dialog-inset-x));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
 /* Add-to-shelf dialog needs to grow with its three fields instead of the
    fixed 250px height, and center itself without relying on transform
    (the popup animation animates transform). */

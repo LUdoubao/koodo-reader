@@ -2,6 +2,19 @@
   padding: 14px 16px 18px;
   box-sizing: border-box;
 }
+
+/* mobile: presets wrap and rows keep a touch height */
+[data-layout="mobile"] .scale-page-preset-row {
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: var(--tap-min);
+}
+
+[data-layout="mobile"] .scale-page-dialog-container {
+  width: calc(100vw - var(--dialog-inset-narrow));
+  max-height: 60dvh;
+  overflow-y: auto;
+}
 .scale-page-dialog-container .font-size-setting {
   width: 100%;
   margin: 0;

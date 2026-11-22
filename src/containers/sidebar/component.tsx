@@ -34,6 +34,8 @@ export interface SidebarState {
 const Sidebar = () => {
   const mode = useAppStore((s) => s.sidebar.mode);
   const isCollapsed = useAppStore((s) => s.sidebar.isCollapsed);
+  const isMobileOpen = useAppStore((s) => s.sidebar.isMobileOpen);
+  const handleMobileDrawer = useAppStore((s) => s.handleMobileDrawer);
   const shelfTitle = useAppStore((s) => s.sidebar.shelfTitle);
   const isAuthed = useAppStore((s) => s.manager.isAuthed);
   const isOpenSortShelfDialog = useAppStore(
@@ -105,6 +107,8 @@ const Sidebar = () => {
     handleShelf("");
     handleSearch(false);
     handleSortDisplay(false);
+    // Drawer must close after a menu choice, including the current route.
+    handleMobileDrawer(false);
   };
   const handleHover = (mode: string) => {
     setState((prev) => ({ ...prev, hoverMode: mode }));
@@ -335,6 +339,7 @@ const Sidebar = () => {
               handleShelf(item);
               handleMode("shelf");
               navigate("/manager/shelf");
+              handleMobileDrawer(false);
             }}
             {...getBookDragHandlers(item, (event) => {
               handleBookDrop(item, event);
@@ -400,7 +405,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <div className="sidebar">
+      <div className={"sidebar" + (isMobileOpen ? " is-mobile-open" : "")}>
         <div
           className="sidebar-list-icon"
           onClick={() => {
@@ -621,6 +626,14 @@ const Sidebar = () => {
           </div>
         </div>
       </div>
+      {isMobileOpen && (
+        <div
+          className="mobile-drawer-mask"
+          onClick={() => {
+            handleMobileDrawer(false);
+          }}
+        ></div>
+      )}
     </>
   );
 };

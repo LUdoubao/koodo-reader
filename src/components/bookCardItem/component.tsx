@@ -12,6 +12,8 @@ import {
   CONTEXT_MENU_WIDTH,
 } from "../../utils/common";
 import { useAppStore } from "../../store/useAppStore";
+import { useLayout } from "../../utils/hooks/useLayoutMode";
+import { useLongPress } from "../../utils/hooks/useLongPress";
 
 import BookModel from "../../models/Book";
 
@@ -26,6 +28,8 @@ export interface BookCardProps {
 declare var window: any;
 
 const BookCardItem: React.FC<BookCardProps> = (props) => {
+  // Cards read the shell-level fact instead of subscribing per instance.
+  const { layout } = useLayout();
   const isOpenActionDialog = useAppStore((s) => s.book.isOpenActionDialog);
   const currentBook = useAppStore((s) => s.book.currentBook);
   const isSelectBook = useAppStore((s) => s.manager.isSelectBook);
@@ -107,6 +111,13 @@ const BookCardItem: React.FC<BookCardProps> = (props) => {
 
   const percentage = getPercentage();
   const actionProps = { left, top };
+  const longPressHandlers = useLongPress((x, y) => {
+    handleMoreAction({
+      preventDefault: () => {},
+      clientX: x,
+      clientY: y,
+    });
+  });
   const dropHandlers = {
     onDragOver: handleBookDropDragOver,
     onDragEnter: handleBookDropDragEnter,
@@ -119,12 +130,13 @@ const BookCardItem: React.FC<BookCardProps> = (props) => {
         className={
           "book-list-item" + (isDropTarget ? " book-drop-target" : "")
         }
-        draggable
+        draggable={layout === "desktop"}
         onDragStart={handleBookDragStart}
         onContextMenu={(event) => {
           handleMoreAction(event);
         }}
         {...dropHandlers}
+        {...longPressHandlers}
       >
         <div
           className="book-item-cover"

@@ -227,3 +227,102 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   transform: scale(1.05) translateY(-3px);
 }
+
+/* mobile: compact header with drawer and search entry points */
+[data-layout="mobile"] .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  height: var(--shell-header-total);
+  margin-left: 0 !important;
+  padding: var(--safe-top) 8px 0;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+[data-layout="mobile"] .mobile-menu-button {
+  margin-right: auto;
+}
+
+/* 空书库时搜索无意义，原位显示导入入口，保证首次使用就能导入图书 */
+[data-layout="mobile"] .mobile-import-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+[data-layout="mobile"] .header-search-container {
+  display: none;
+}
+
+[data-layout="mobile"] .header.is-mobile-search-open .header-search-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100% !important;
+  height: var(--shell-header-total);
+  margin-left: 0;
+  padding: var(--safe-top) 8px 0;
+  box-sizing: border-box;
+  background: var(--panel-bg, inherit);
+}
+
+[data-layout="mobile"] .header-search-container > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+[data-layout="mobile"] .mobile-search-close {
+  display: flex;
+}
+
+[data-layout="mobile"] .header.is-mobile-search-open .mobile-search-toggle,
+[data-layout="mobile"] .header.is-mobile-search-open .mobile-menu-button {
+  visibility: hidden;
+}
+
+[data-layout="mobile"] .setting-icon-parrent {
+  position: static;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: auto;
+  margin-left: 0 !important;
+}
+
+[data-layout="mobile"] .setting-icon-parrent .setting-icon-container {
+  width: var(--tap-min);
+  height: var(--tap-min);
+  margin-left: 0;
+  float: none;
+}
+
+[data-layout="mobile"] .header-chat-widget,
+[data-layout="mobile"] .header-report-container,
+[data-layout="mobile"] .download-demo-book,
+[data-layout="mobile"] .only-local-container,
+[data-layout="mobile"] .import-from-cloud,
+[data-layout="mobile"] .import-from-local {
+  display: none !important;
+}
+
+/* keep the desktop-only search affordance hidden on desktop */
+.mobile-search-close {
+  display: none;
+}

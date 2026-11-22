@@ -2,6 +2,15 @@
   width: 454px !important;
 }
 
+/* mobile: full-width sheet overrides the desktop fixed width */
+[data-layout="mobile"] .auto-import-container {
+  width: 100dvw !important;
+  height: var(--app-height, 100dvh) !important;
+  left: 0 !important;
+  top: 0 !important;
+  border-radius: 0 !important;
+}
+
 .auto-import-empty {
   text-align: center;
   opacity: 0.5;

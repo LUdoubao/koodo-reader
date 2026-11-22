@@ -329,6 +329,7 @@
   "System OCR": "系统 OCR",
   "Note": "笔记",
   "Page width": "页面宽度",
+  "Scale page": "页面缩放",
   "Preset width": "预设宽度",
   "Fit to page": "适应页面",
   "Change": "更改",
@@ -1220,5 +1221,7 @@
   "Baidu Netdisk authorization failed": "百度网盘授权失败",
   "Baidu Netdisk is not configured on this server": "此服务器未配置百度网盘",
   "No books found in this folder": "此文件夹没有找到书籍",
-  "Disconnect": "断开连接"
+  "Disconnect": "断开连接",
+  "Menu": "菜单",
+  "Close panel": "关闭面板"
 }

@@ -134,6 +134,7 @@ const ReaderBottomToolbar = (props: ReaderBottomToolbarProps) => {
       await htmlBook.rendition.prev();
     }
     handleSaveLocation();
+    handleFetchPercentage(currentBook);
     setTimeout(() => (lock = false), throttleTime);
   };
 
@@ -146,6 +147,7 @@ const ReaderBottomToolbar = (props: ReaderBottomToolbarProps) => {
       await htmlBook.rendition.next();
     }
     handleSaveLocation();
+    handleFetchPercentage(currentBook);
     setTimeout(() => (lock = false), throttleTime);
   };
 
@@ -193,6 +195,7 @@ const ReaderBottomToolbar = (props: ReaderBottomToolbarProps) => {
       <div className="reader-bottom-toolbar-left">
         <div
           className="previous-chapter"
+          aria-label={t("Previous page")}
           onClick={() => {
             handlePrevPage();
           }}
@@ -228,6 +231,8 @@ const ReaderBottomToolbar = (props: ReaderBottomToolbarProps) => {
         </div>
         <input
           className="input-progress"
+          aria-label={t("Progress")}
+          aria-valuetext={`${state.currentPercentage}%`}
           value={state.currentPercentage}
           type="range"
           max="100"
@@ -348,6 +353,7 @@ const ReaderBottomToolbar = (props: ReaderBottomToolbarProps) => {
         </div>
         <div
           className="next-chapter"
+          aria-label={t("Next page")}
           onClick={() => {
             handleNextPage();
           }}
