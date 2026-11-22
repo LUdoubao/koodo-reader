@@ -619,7 +619,7 @@ const ImportDialog = () => {
 
   return (
     <div
-      className="backup-page-container"
+      className="backup-page-container import-dialog-page"
       style={
         layout === "mobile"
           ? undefined

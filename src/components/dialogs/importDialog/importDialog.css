@@ -19,8 +19,11 @@
 
 /* mobile: full-screen source picker must sit above the header (20) and the
    list action bar (12), otherwise the top/bottom controls hide its own title,
-   close button and actions. */
-[data-layout="mobile"] .backup-page-container {
+   close button and actions. Scoped to the import dialog's own modifier class:
+   a bare `.backup-page-container` rule also lifts the OPDS, local-folder,
+   sort-shelf and auto-import sheets, and would then cover the settings sheet
+   that this picker opens for an unauthorized Pro drive. */
+[data-layout="mobile"] .backup-page-container.import-dialog-page {
   z-index: 40;
   background: var(--panel-bg, #fff);
 }
