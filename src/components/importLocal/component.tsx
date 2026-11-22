@@ -16,6 +16,7 @@ import {
   ConfigService,
 } from "../../assets/lib/kookit-extra-browser.min";
 import CoverUtil from "../../utils/file/coverUtil";
+import { PRO_ENABLED } from "../../constants/featureFlag";
 import { Readability } from "@mozilla/readability";
 import {
   calculateFileMD5,
@@ -376,6 +377,7 @@ const ImportLocal = (props: ImportLocalProps) => {
   const analyzeBookMetadata = async (book: BookModel, bookName: string) => {
     if (
       ConfigService.getReaderConfig("isAIAnalyzeTitle") !== "yes" ||
+      !PRO_ENABLED ||
       !isAuthed ||
       book.name !== bookName
     ) {

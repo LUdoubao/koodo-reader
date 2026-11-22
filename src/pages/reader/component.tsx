@@ -18,6 +18,7 @@ import ConvertDialog from "../../components/dialogs/convertDialog";
 import ScalePageDialog from "../../components/dialogs/scalePageDialog";
 import PdfCropDialog from "../../components/dialogs/pdfCropDialog";
 import StudyLangDialog from "../../components/dialogs/studyLangDialog";
+import { PRO_ENABLED } from "../../constants/featureFlag";
 import AssistReadDialog from "../../components/dialogs/assistReadDialog";
 import { isElectron } from "react-device-detect";
 import SettingDialog from "../../components/dialogs/settingDialog";
@@ -894,9 +895,11 @@ const Reader = () => {
         <KeepMounted open={isPdfCropOpen}>
           <PdfCropDialog />
         </KeepMounted>
-        <KeepMounted open={isStudyLangOpen}>
-          <StudyLangDialog />
-        </KeepMounted>
+        {PRO_ENABLED && (
+          <KeepMounted open={isStudyLangOpen}>
+            <StudyLangDialog />
+          </KeepMounted>
+        )}
         <KeepMounted open={isAssistReadOpen}>
           <AssistReadDialog />
         </KeepMounted>
@@ -905,7 +908,7 @@ const Reader = () => {
         </KeepMounted>
       </div>
       {isAnnotationOpen && <AnnotationDialog />}
-      <SupportDialog />
+      {PRO_ENABLED ? <SupportDialog /> : null}
       {isOpenPopupOptionDialog && (
         <>
           <PopupOptionDialog />

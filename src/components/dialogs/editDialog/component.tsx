@@ -16,6 +16,7 @@ import {
   formatDateToDay,
   trimSpecialCharacters,
 } from "../../../utils/common";
+import { PRO_ENABLED } from "../../../constants/featureFlag";
 import { analyzeBookTitle } from "../../../utils/request/reader";
 
 export interface EditDialogState {
@@ -180,7 +181,7 @@ const EditDialog = () => {
   };
 
   const handleAnalyzeTitle = async () => {
-    if (!isAuthed) {
+    if (!PRO_ENABLED || !isAuthed) {
       toast(t("Please upgrade to Pro to use this feature"));
       handleSetting(true);
       handleSettingMode("account");
@@ -311,6 +312,8 @@ const EditDialog = () => {
       )}
       <div className="edit-dialog-title" style={{ position: "relative" }}>
         <Trans>Edit Book</Trans>
+        {/* 元数据识别依赖官方 AI，关闭专业版时整入口不渲染 */}
+        {PRO_ENABLED && (
         <div
           style={{
             fontSize: 16,
@@ -334,6 +337,7 @@ const EditDialog = () => {
           <Trans>Get metadata</Trans>
           <span style={{ fontSize: "13px", color: "#f16464" }}> (Pro)</span>
         </div>
+        )}
       </div>
 
       <div className="edit-dialog-body">

@@ -27,6 +27,7 @@ import {
 import SyncService from "./storage/syncService";
 import localforage from "localforage";
 import { driveList } from "../constants/driveList";
+import { PRO_ENABLED } from "../constants/featureFlag";
 import { updateUserConfig } from "./request/user";
 import { languageCNMap, languageENMap } from "../constants/ttsList";
 import { BookHelper } from "../assets/lib/kookit.min";
@@ -2104,7 +2105,7 @@ export const getOcrLangList = (engine: string) => {
   let list: any[];
   if (engine === "tesseract") {
     list = ocrTesseractLangList;
-  } else if (engine === "official-ai-ocr") {
+  } else if (PRO_ENABLED && engine === "official-ai-ocr") {
     list = [
       {
         label: "General",
@@ -2159,7 +2160,7 @@ export const getDefaultOcrLang = (engine: string, currentBook: any) => {
         (item) => item.lang === ConfigService.getReaderConfig("lang")
       )?.value || "chi_sim"
     );
-  } else if (engine === "official-ai-ocr") {
+  } else if (PRO_ENABLED && engine === "official-ai-ocr") {
     return "general";
   } else if (engine === "system-ocr") {
     return "auto";

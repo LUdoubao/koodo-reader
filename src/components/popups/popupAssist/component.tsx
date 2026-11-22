@@ -21,6 +21,8 @@ import { chatStream, llmReport } from "../../../utils/request/common";
 import { marked } from "marked";
 import { sampleQuestion } from "../../../constants/settingList";
 import { useAppStore } from "../../../store/useAppStore";
+import { PRO_ENABLED } from "../../../constants/featureFlag";
+import { filterOfficialPlugins } from "../../../utils/pro/proFeatureGuard";
 
 export type AiChatMessage = {
   role: "user" | "assistant";
@@ -213,7 +215,7 @@ const PopupAssist = (props: PopupAssistProps) => {
           aiService: pluginList[0].key,
         });
         ConfigService.setReaderConfig("aiService", pluginList[0].key);
-      } else if (isAuthed) {
+      } else if (PRO_ENABLED && isAuthed) {
         mergeState({
           aiService: "official-ai-assistant-plugin",
           isAddNew: false,
@@ -514,7 +516,10 @@ const PopupAssist = (props: PopupAssistProps) => {
     }
   };
   const handleChangeAiService = (aiService: string) => {
-    if (aiService === "official-ai-assistant-plugin" && !isAuthed) {
+    if (
+      aiService === "official-ai-assistant-plugin" &&
+      (!PRO_ENABLED || !isAuthed)
+    ) {
       toast(t("Please upgrade to Pro to use this feature"));
       handleSetting(true);
       handleSettingMode("account");
@@ -839,7 +844,7 @@ const PopupAssist = (props: PopupAssistProps) => {
               >
                 {t("Please select")}
               </option>
-              {plugins
+              {filterOfficialPlugins(plugins)
                 .filter((item) => item.type === "assistant")
                 .map((item) => {
                   return (
@@ -849,7 +854,8 @@ const PopupAssist = (props: PopupAssistProps) => {
                       className="add-dialog-shelf-list-option"
                     >
                       {t(item.displayName)}
-                      {item.key === "official-ai-assistant-plugin" && (
+                      {PRO_ENABLED &&
+                        item.key === "official-ai-assistant-plugin" && (
                         <span style={{ fontSize: "13px", color: "#f16464" }}>
                           {" "}
                           (Pro)

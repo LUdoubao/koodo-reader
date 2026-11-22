@@ -18,6 +18,7 @@ import DatabaseService from "../../utils/storage/databaseService";
 import Note from "../../models/Note";
 import ConfigUtil from "../../utils/file/configUtil";
 import { useAppStore } from "../../store/useAppStore";
+import { PRO_ENABLED } from "../../constants/featureFlag";
 
 export interface PageWidgetState {
   isSingle: boolean;
@@ -211,6 +212,7 @@ const PageWidget = () => {
           currentBook.key
         ) ||
         ConfigService.getReaderConfig("fullTranslationMode") === "no" ||
+        !PRO_ENABLED ||
         !isAuthed
       ) {
         return;
@@ -274,6 +276,7 @@ const PageWidget = () => {
         !ConfigService.getAllListConfig("wordDefinitionBooks").includes(
           currentBook.key
         ) ||
+        !PRO_ENABLED ||
         !isAuthed
       ) {
         return;

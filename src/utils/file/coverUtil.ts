@@ -12,6 +12,8 @@ import {
 import { getCloudConfig } from "./common";
 import { LocalFileManager } from "./localFile";
 import TokenService from "../storage/tokenService";
+import { PRO_ENABLED } from "../../constants/featureFlag";
+import { isFreeDriveService } from "../pro/proFeatureGuard";
 declare var window: any;
 class AsyncQueue {
   private queue: (() => Promise<void>)[] = [];
@@ -357,14 +359,20 @@ class CoverUtil {
     }
   }
   static async uploadCover(cover: string) {
-    let isAuthed = await TokenService.getToken("is_authed");
-    if (isAuthed !== "yes") {
-      return;
+    if (PRO_ENABLED) {
+      let isAuthed = await TokenService.getToken("is_authed");
+      if (isAuthed !== "yes") {
+        return;
+      }
     }
     if (isElectron) {
       const ipcRenderer = window.electronAPI;
       let service = ConfigService.getItem("defaultSyncOption");
       if (!service) {
+        return;
+      }
+      if (!PRO_ENABLED && !isFreeDriveService(service)) {
+        // 关闭专业版后封面同步只走本地文件夹，旧云盘令牌不再上传封面
         return;
       }
       let tokenConfig = await getCloudConfig(service);
@@ -460,9 +468,17 @@ class CoverUtil {
     }
   }
   static async deleteCloudCover(key: string) {
-    let isAuthed = await TokenService.getToken("is_authed");
-    if (isAuthed !== "yes") {
-      return;
+    if (PRO_ENABLED) {
+      let isAuthed = await TokenService.getToken("is_authed");
+      if (isAuthed !== "yes") {
+        return;
+      }
+    } else {
+      let service = ConfigService.getItem("defaultSyncOption");
+      // 关闭专业版后封面删除同样只允许本地文件夹，避免旧云盘令牌绕过 UI
+      if (!service || !isFreeDriveService(service)) {
+        return;
+      }
     }
     let coverList = await this.getCloudCoverList();
     for (let cover of coverList) {

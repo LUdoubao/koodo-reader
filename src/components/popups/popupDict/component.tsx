@@ -35,6 +35,8 @@ import {
   isCustomRendererPlugin,
 } from "../../../utils/plugins/customPlugin";
 import { useAppStore } from "../../../store/useAppStore";
+import { PRO_ENABLED } from "../../../constants/featureFlag";
+import { filterOfficialPlugins } from "../../../utils/pro/proFeatureGuard";
 
 export interface PopupDictProps {
   isDockedRight: boolean;
@@ -277,6 +279,7 @@ const PopupDict = (props: PopupDictProps) => {
         if (!dictId) return "";
         dictText = await DictUtil.lookupWord(dictId, text);
       } else if (
+        PRO_ENABLED &&
         isAuthed &&
         ConfigService.getReaderConfig("isDisableAI") !== "yes" &&
         ConfigService.getReaderConfig("dictService") ===
@@ -329,6 +332,7 @@ const PopupDict = (props: PopupDictProps) => {
         updateState({ dictText: dictText });
       }
       if (
+        PRO_ENABLED &&
         isAuthed &&
         ConfigService.getReaderConfig("isDisableAI") !== "yes" &&
         ConfigService.getReaderConfig("dictService") ===
@@ -444,7 +448,10 @@ const PopupDict = (props: PopupDictProps) => {
   }, [state.dictText]);
 
   const handleChangeDictService = (dictService: string) => {
-    if (dictService === "official-ai-dict-plugin" && !isAuthed) {
+    if (
+      dictService === "official-ai-dict-plugin" &&
+      (!PRO_ENABLED || !isAuthed)
+    ) {
       toast(t("Please upgrade to Pro to use this feature"));
       handleSetting(true);
       handleSettingMode("account");
@@ -506,7 +513,7 @@ const PopupDict = (props: PopupDictProps) => {
             >
               {t("Please select")}
             </option>
-            {plugins
+            {filterOfficialPlugins(plugins)
               .filter((item) => item.type === "dictionary")
               .map((item) => {
                 return (
@@ -516,7 +523,8 @@ const PopupDict = (props: PopupDictProps) => {
                       className="add-dialog-shelf-list-option"
                     >
                       {t(item.displayName)}
-                      {item.key === "official-ai-dict-plugin" && (
+                      {PRO_ENABLED &&
+                        item.key === "official-ai-dict-plugin" && (
                         <span style={{ fontSize: "13px", color: "#f16464" }}>
                           {" "}
                           (Pro)

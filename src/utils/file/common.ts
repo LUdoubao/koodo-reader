@@ -11,6 +11,9 @@ import Note from "../../models/Note";
 import Bookmark from "../../models/Bookmark";
 import DictHistory from "../../models/DictHistory";
 import { decryptToken } from "../request/thirdparty";
+import { getLocalFolderConfig } from "./localFolder";
+import { isFreeDriveService } from "../pro/proFeatureGuard";
+import { PRO_ENABLED } from "../../constants/featureFlag";
 import toast from "react-hot-toast";
 import { Buffer } from "buffer";
 import i18n from "../../i18n";
@@ -294,6 +297,15 @@ export const getCloudConfig = (service: string): Promise<any> => {
   return next;
 };
 export const getCloudToken = async (service: string) => {
+  if (!PRO_ENABLED) {
+    // 关闭专业版后本地文件夹同步改读本地路径配置，避免依赖登录态令牌服务；
+    // 其余云盘直接返回空，防止残留令牌继续解密并发起云端请求。
+    if (isFreeDriveService(service)) {
+      const config = getLocalFolderConfig();
+      return Object.keys(config).length > 0 ? config : null;
+    }
+    return null;
+  }
   if (configCache[service]) {
     return configCache[service];
   } else {

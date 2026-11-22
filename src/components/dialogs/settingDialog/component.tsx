@@ -20,6 +20,7 @@ import DictSetting from "../../../containers/settings/dictSetting";
 import MoreSetting from "../../../containers/settings/moreSetting";
 import ShortcutSetting from "../../../containers/settings/shortcutSetting";
 import { isElectron } from "react-device-detect";
+import { PRO_ENABLED } from "../../../constants/featureFlag";
 const SettingDialog = () => {
   const settingMode = useAppStore((s) => s.manager.settingMode);
   const handleSetting = useAppStore((s) => s.handleSetting);
@@ -113,7 +114,8 @@ const SettingDialog = () => {
 
           {/* First group */}
           <div className="setting-dialog-sidebar-group">
-            {renderSidebarItem("account", "icon-user", "Account", "18px")}
+            {PRO_ENABLED &&
+              renderSidebarItem("account", "icon-user", "Account", "18px")}
             {renderSidebarItem("general", "icon-setting", "General", "")}
             {renderSidebarItem("data", "icon-archive", "Data", "15px")}
             {renderSidebarItem(
@@ -218,7 +220,8 @@ const SettingDialog = () => {
             ) : settingMode === "sync" ? (
               <SyncSetting />
             ) : settingMode === "account" ? (
-              <AccountSetting />
+              // 关闭专业版后 account 模式回落到常规设置，避免旧入口渲染空白页
+              PRO_ENABLED ? <AccountSetting /> : <GeneralSetting />
             ) : settingMode === "data" ? (
               <DataSetting />
             ) : settingMode === "about" ? (

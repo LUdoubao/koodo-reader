@@ -38,6 +38,7 @@ import {
 import Footer from "../../components/footer";
 import ProtectionOverlay from "../../components/protection";
 import { useAppStore } from "../../store/useAppStore";
+import { PRO_ENABLED } from "../../constants/featureFlag";
 
 const collectionUtil = new CollectionUtil(ConfigService);
 
@@ -322,7 +323,10 @@ const Manager = () => {
           handleLoadingDialog(false);
           if (!isAuthed) {
             handleNewDialog(false);
-            handleShowSupport(false);
+            // 关闭专业版后不再驱动升级/试用弹窗的关闭状态，其余弹窗照常关闭
+            if (PRO_ENABLED) {
+              handleShowSupport(false);
+            }
           }
           handleLocalFileDialog(false);
           handleImportDialog(false);

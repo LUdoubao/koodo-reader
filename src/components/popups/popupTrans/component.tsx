@@ -20,6 +20,8 @@ import {
   isCustomRendererPlugin,
 } from "../../../utils/plugins/customPlugin";
 import { useAppStore } from "../../../store/useAppStore";
+import { PRO_ENABLED } from "../../../constants/featureFlag";
+import { filterOfficialPlugins } from "../../../utils/pro/proFeatureGuard";
 
 export interface PopupTransProps {
   isDockedRight: boolean;
@@ -199,6 +201,7 @@ const PopupTrans = (props: PopupTransProps) => {
         isAiWaiting: false,
       }));
     } else if (
+      PRO_ENABLED &&
       isAuthed &&
       ConfigService.getReaderConfig("isDisableAI") !== "yes"
     ) {
@@ -302,7 +305,10 @@ const PopupTrans = (props: PopupTransProps) => {
   }, [originalText]);
 
   const handleChangeService = (target: string) => {
-    if (target === "official-ai-trans-plugin" && !isAuthed) {
+    if (
+      target === "official-ai-trans-plugin" &&
+      (!PRO_ENABLED || !isAuthed)
+    ) {
       toast(t("Please upgrade to Pro to use this feature"));
       handleSetting(true);
       handleSettingMode("account");
@@ -340,7 +346,7 @@ const PopupTrans = (props: PopupTransProps) => {
             <span className="icon-add trans-add-icon"></span>
             <Trans>Add</Trans>
           </div>
-          {plugins
+          {filterOfficialPlugins(plugins)
             .filter((item) => item.type === "translation")
             .map((item) => {
               return (
@@ -357,7 +363,7 @@ const PopupTrans = (props: PopupTransProps) => {
                 >
                   <span className={`icon-${item.icon} trans-icon`}></span>
                   {t(item.displayName)}
-                  {item.key === "official-ai-trans-plugin" && (
+                  {PRO_ENABLED && item.key === "official-ai-trans-plugin" && (
                     <span style={{ fontSize: "13px", color: "#f16464" }}>
                       {" "}
                       (Pro)
