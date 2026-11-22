@@ -1,5 +1,5 @@
 ﻿import { useEffect } from "react";
-import { Route, Routes, HashRouter } from "react-router-dom";
+import { Route, Routes, HashRouter, Navigate } from "react-router-dom";
 import { changeLanguage } from "../i18n";
 import { ConfigService } from "../assets/lib/kookit-extra-browser.min";
 import Manager from "../pages/manager";
@@ -8,6 +8,7 @@ import Stats from "../pages/stats";
 import HtmlReader from "../pages/reader";
 import _Redirect from "../pages/redirect";
 import { LayoutProvider } from "../utils/hooks/useLayoutMode";
+import { PRO_ENABLED } from "../constants/featureFlag";
 
 const Router = () => {
   useEffect(() => {
@@ -148,7 +149,15 @@ const Router = () => {
       <LayoutProvider>
         <Routes>
           <Route element={<Manager />} path="/manager/*" />
-          <Route element={<Login />} path="/login" />
+          {PRO_ENABLED ? (
+            <Route element={<Login />} path="/login" />
+          ) : (
+            // 关闭专业版后账户页不可达，手输 /login 也直接回到书库
+            <Route
+              element={<Navigate replace to="/manager/home" />}
+              path="/login"
+            />
+          )}
           <Route element={<Stats />} path="/stats" />
           <Route element={<HtmlReader />} path="/epub/*" />
           <Route element={<HtmlReader />} path="/mobi/*" />

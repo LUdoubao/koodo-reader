@@ -23,6 +23,7 @@ import { getTextRules } from "../../utils/common";
 import "./textToSpeech.css";
 import SwitchRow from "../readerSettings/switchRow";
 import { fetchUserInfo } from "../../utils/request/user";
+import { PRO_ENABLED } from "../../constants/featureFlag";
 import { getSplitSentence } from "../../utils/request/reader";
 import { Howl } from "howler";
 import { useAppStore } from "../../store/useAppStore";
@@ -301,7 +302,7 @@ const TextToSpeech = () => {
   };
   const handleMultiRoleToggle = (enabled: boolean) => {
     if (enabled) {
-      if (!isAuthed) {
+      if (!PRO_ENABLED || !isAuthed) {
         toast(t("Please upgrade to Pro to use this feature"));
         handleSetting(true);
         handleSettingMode("account");
@@ -462,8 +463,9 @@ const TextToSpeech = () => {
     if (
       ConfigService.getReaderConfig("voiceEngine") ===
         "official-ai-voice-plugin" &&
-      !isAuthed
+      (!PRO_ENABLED || !isAuthed)
     ) {
+      // 关闭专业版后官方语音引擎不可达，开始朗读前统一回落到系统语音
       ConfigService.setReaderConfig("voiceEngine", "system");
     }
     // 每次开始朗读前刷新文本规则（replace / delete）
@@ -551,7 +553,10 @@ const TextToSpeech = () => {
     const currentIndex = stateRef.current.currentIndex;
 
     // 鉴权检查（AI 语音）
-    if (newVoiceEngine === "official-ai-voice-plugin" && !isAuthed) {
+    if (
+      newVoiceEngine === "official-ai-voice-plugin" &&
+      (!PRO_ENABLED || !isAuthed)
+    ) {
       toast(t("Please upgrade to Pro to use this feature"));
       return;
     }
@@ -1223,7 +1228,10 @@ const TextToSpeech = () => {
                 return;
               }
               const newEngine = voice.plugin || "system";
-              if (newEngine === "official-ai-voice-plugin" && !isAuthed) {
+              if (
+                newEngine === "official-ai-voice-plugin" &&
+                (!PRO_ENABLED || !isAuthed)
+              ) {
                 toast(t("Please upgrade to Pro to use this feature"));
                 handleSetting(true);
                 handleSettingMode("account");
@@ -1316,6 +1324,8 @@ const TextToSpeech = () => {
           </span>
         </div>
         {/* Multi-role reading section */}
+        {PRO_ENABLED && (
+          <>
         <SwitchRow
           variant="setting"
           title={
@@ -1351,7 +1361,9 @@ const TextToSpeech = () => {
             }
           </Trans>
         </p>
-        {stateRef.current.multiRoleEnabled && (
+          </>
+        )}
+        {PRO_ENABLED && stateRef.current.multiRoleEnabled && (
           <>
             {/* Voice Type Selection */}
             <div
@@ -1399,12 +1411,14 @@ const TextToSpeech = () => {
                 <option value="system" className="lang-setting-option">
                   {t("System voice")}
                 </option>
-                <option
-                  value="official-ai-voice-plugin"
-                  className="lang-setting-option"
-                >
-                  {t("Official Voice")}
-                </option>
+                {PRO_ENABLED && (
+                  <option
+                    value="official-ai-voice-plugin"
+                    className="lang-setting-option"
+                  >
+                    {t("Official Voice")}
+                  </option>
+                )}
                 <option value="custom" className="lang-setting-option">
                   {t("Custom voice")}
                 </option>

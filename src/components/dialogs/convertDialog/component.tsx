@@ -15,6 +15,7 @@ import {
 import toast from "react-hot-toast";
 import { getDefaultOcrEngine, getOcrLangList } from "../../../utils/common";
 import SwitchRow from "../../readerSettings/switchRow";
+import { PRO_ENABLED } from "../../../constants/featureFlag";
 
 const ConvertDialog = () => {
   const isAuthed = useAppStore((s) => s.manager.isAuthed);
@@ -126,7 +127,10 @@ const ConvertDialog = () => {
                 forceUpdate();
                 return;
               }
-              if (event.target.value === "official-ai-ocr" && !isAuthed) {
+              if (
+                event.target.value === "official-ai-ocr" &&
+                (!PRO_ENABLED || !isAuthed)
+              ) {
                 toast(t("Please upgrade to Pro to use this feature"));
                 handleSetting(true);
                 handleSettingMode("account");
@@ -168,7 +172,7 @@ const ConvertDialog = () => {
                 key={item.value}
                 className="lang-setting-option"
               >
-                {t(item.label) + (item.isPro ? " (Pro)" : "")}
+                {t(item.label) + (PRO_ENABLED && item.isPro ? " (Pro)" : "")}
               </option>
             ))}
             <option

@@ -1,4 +1,5 @@
 import { useLatest } from "../../utils/hooks/useLatest";
+import { PRO_ENABLED } from "../../constants/featureFlag";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import BookUtil from "../../utils/file/bookUtil";
@@ -442,6 +443,7 @@ const Viewer = (props: ViewerProps) => {
           propsRef.current.currentBook.key
         ),
         fullTranslationMode:
+          PRO_ENABLED &&
           ConfigService.getAllListConfig("fullTranslationBooks").includes(
             propsRef.current.currentBook.key
           ) && propsRef.current.isAuthed

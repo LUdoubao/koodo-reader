@@ -2,6 +2,7 @@ import i18n from "../i18n";
 import { KookitConfig } from "../assets/lib/kookit-extra-browser.min";
 import type PluginModel from "../models/Plugin";
 import { getBuiltinPluginDefinition } from "../utils/plugins/catalog";
+import { PRO_ENABLED } from "./featureFlag";
 
 export const fullTranslationLangList = (() => {
   const seen = new Set<string>();
@@ -181,23 +182,28 @@ export const dropdownList = [
     ],
     isPDF: true,
   },
-  {
-    title: "Full text translation",
-    group: "more",
-    value: "fullTranslationMode",
-    option: [
-      { label: "Disable", value: "no" },
-      {
-        label: "Bilingual translation",
-        value: "both",
-      },
-      {
-        label: "Only translation",
-        value: "target",
-      },
-    ],
-    isPDF: false,
-  },
+  // 全文翻译依赖官方翻译服务，关闭专业版时整项从阅读设置中移除
+  ...(PRO_ENABLED
+    ? [
+        {
+          title: "Full text translation",
+          group: "more",
+          value: "fullTranslationMode",
+          option: [
+            { label: "Disable", value: "no" },
+            {
+              label: "Bilingual translation",
+              value: "both",
+            },
+            {
+              label: "Only translation",
+              value: "target",
+            },
+          ],
+          isPDF: false,
+        },
+      ]
+    : []),
   {
     title: "CJK font family",
     group: "font",
@@ -497,5 +503,11 @@ export const getOcrEngineList = (
       },
     ];
   });
-  return [...ocrEngineList, ...pluginOptions];
+  return [
+    ...ocrEngineList.filter(
+      // 关闭专业版后官方 OCR 不可达，配置里残留的官方引擎也不再进入选择列表
+      (item) => PRO_ENABLED || item.value !== "official-ai-ocr"
+    ),
+    ...pluginOptions,
+  ];
 };

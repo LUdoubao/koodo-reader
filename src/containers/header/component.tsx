@@ -50,6 +50,8 @@ import { getNotification } from "../../utils/request/common";
 import TokenService from "../../utils/storage/tokenService";
 import { useAppStore } from "../../store/useAppStore";
 import { useLayout } from "../../utils/hooks/useLayoutMode";
+import { PRO_ENABLED } from "../../constants/featureFlag";
+import { isFreeDriveService } from "../../utils/pro/proFeatureGuard";
 
 export interface HeaderProps {
   handleDrag: (isDrag: boolean) => void;
@@ -304,6 +306,14 @@ const Header = (props: HeaderProps) => {
       return false;
     }
     if (
+      !PRO_ENABLED &&
+      !isFreeDriveService(ConfigService.getItem("defaultSyncOption"))
+    ) {
+      // 关闭专业版后只剩本地文件夹，旧的云端默认数据源直接拒绝同步，
+      // 避免残留令牌绕过 UI 继续发起云端请求
+      return false;
+    }
+    if (
       ConfigService.getReaderConfig("isEnableKoodoSync") === "yes" &&
       userInfo &&
       userInfo.default_sync_option &&
@@ -463,7 +473,10 @@ const Header = (props: HeaderProps) => {
     setTimeout(async () => {
       if (useAppStore.getState().sidebar.mode === "home") {
         navigate("/manager/home");
+        // 关闭专业版时不再引导开启 Koodo 云同步：该引导会写 isEnableKoodoSync
+        // 并请求用户接口，等于在没有账号的前提下重新激活云端链路。
         if (
+          PRO_ENABLED &&
           ConfigService.getReaderConfig("isFirstSync") !== "no" &&
           ConfigService.getReaderConfig("isEnableKoodoSync") !== "yes"
         ) {
@@ -817,7 +830,7 @@ const Header = (props: HeaderProps) => {
           <span className="icon-search"></span>
         </div>
       )}
-      {isAuthed && (
+      {PRO_ENABLED && isAuthed && (
         <div
           className="header-chat-widget"
           onClick={async () => {
@@ -916,7 +929,9 @@ const Header = (props: HeaderProps) => {
             ></span>
           </span>
         </div>
-        {!isAuthed && window.location.hostname !== "web.koodoreader.cn" && (
+        {PRO_ENABLED &&
+          !isAuthed &&
+          window.location.hostname !== "web.koodoreader.cn" && (
           <div
             className="setting-icon-container"
             onClick={() => {
@@ -944,7 +959,13 @@ const Header = (props: HeaderProps) => {
         <div
           className="setting-icon-container"
           onClick={async () => {
-            if (isAuthed) {
+            const isKoReaderOnly =
+              ConfigService.getReaderConfig("isEnableKoReaderSync") === "yes";
+            // 关闭专业版后不再要求登录：只要配置了本地文件夹就能直接同步
+            const canSync = PRO_ENABLED
+              ? isAuthed
+              : Boolean(ConfigService.getItem("defaultSyncOption"));
+            if (canSync) {
               if (!ConfigService.getItem("defaultSyncOption")) {
                 toast(
                   t(
@@ -958,19 +979,28 @@ const Header = (props: HeaderProps) => {
               setIsSync(true);
               let userInfo = await handleFetchUserInfo();
               await handleCloudSync(userInfo);
-            } else {
-              if (
-                ConfigService.getReaderConfig("isEnableKoReaderSync") !== "yes"
-              ) {
-                toast(t("Please upgrade to Pro to use this feature"));
-                handleSetting(true);
-                handleSettingMode("account");
-                setIsSync(false);
-              } else {
+            } else if (!PRO_ENABLED) {
+              if (isKoReaderOnly) {
                 setIsSync(true);
                 await handleKOReaderSync();
                 setIsSync(false);
+                return;
               }
+              toast(
+                t("Please add data source in the setting-Sync and backup first")
+              );
+              handleSetting(true);
+              handleSettingMode("sync");
+              setIsSync(false);
+            } else if (!isKoReaderOnly) {
+              toast(t("Please upgrade to Pro to use this feature"));
+              handleSetting(true);
+              handleSettingMode("account");
+              setIsSync(false);
+            } else {
+              setIsSync(true);
+              await handleKOReaderSync();
+              setIsSync(false);
             }
           }}
           style={{ marginTop: "2px" }}
@@ -990,7 +1020,8 @@ const Header = (props: HeaderProps) => {
         </div>
       </div>
 
-      {!isAuthed &&
+      {PRO_ENABLED &&
+      !isAuthed &&
       !state.isHidePro &&
       window.location.hostname !== "web.koodoreader.cn" ? (
         <div className="header-report-container">
@@ -1021,7 +1052,8 @@ const Header = (props: HeaderProps) => {
           ></span>
         </div>
       ) : null}
-      {isAuthed &&
+      {PRO_ENABLED &&
+      isAuthed &&
       userInfo &&
       ((userInfo.type === "pro" &&
         userInfo.valid_until < new Date().getTime() / 1000 + 30 * 24 * 3600) ||
@@ -1063,7 +1095,8 @@ const Header = (props: HeaderProps) => {
           </span>
         </div>
       ) : null}
-      {isAuthed &&
+      {PRO_ENABLED &&
+      isAuthed &&
       userInfo &&
       userInfo.type === "trial" &&
       userInfo.valid_until > new Date().getTime() / 1000 + 3 * 24 * 3600 ? (
@@ -1122,7 +1155,7 @@ const Header = (props: HeaderProps) => {
           handleDrag: props.handleDrag,
         } as any)}
       />
-      <SupportDialog />
+      {PRO_ENABLED ? <SupportDialog /> : null}
       <UpdateInfo />
     </div>
   );

@@ -1,4 +1,6 @@
-export const driveList = [
+import { FREE_DRIVE_VALUES, PRO_ENABLED } from "./featureFlag";
+
+const allDriveList = [
   {
     label: "WebDAV",
     value: "webdav",
@@ -151,6 +153,18 @@ export const driveList = [
     scoped: false,
   },
 ];
+
+/**
+ * 云同步数据源列表。
+ *
+ * 专业版关闭时只保留免费数据源（本地文件夹），并去掉 UI 上的 Pro 标记；
+ * 其余数据源仍留在令牌与 `dataSourceList` 中，开关恢复后自动回到列表。
+ */
+export const driveList = PRO_ENABLED
+  ? allDriveList
+  : allDriveList
+      .filter((item) => FREE_DRIVE_VALUES.includes(item.value))
+      .map((item) => ({ ...item, isPro: false }));
 interface ConfigItem {
   label: string;
   value: string;

@@ -30,6 +30,12 @@ import { NATURAL_VOICE_SAPI_ADAPTER_PLUGIN_KEY } from "../utils/plugins/catalog"
 import type { PluginConfig, PluginVoice } from "../utils/plugins/types";
 import { handleExitApp } from "../utils/request/common";
 import { HighlightValue, langToName } from "../utils/common";
+import { PRO_ENABLED } from "../constants/featureFlag";
+import {
+  applyProFeaturePolicy,
+  filterOfficialPlugins,
+  restoreProFeaturePolicy,
+} from "../utils/pro/proFeatureGuard";
 import toast from "react-hot-toast";
 import i18n from "../i18n";
 
@@ -397,8 +403,13 @@ export const useAppStore = create<AppState>()((set, get) => {
     handleSelectedBooks: (selectedBooks: string[]) =>
       setManager({ selectedBooks }),
     handleNewWarning: (isNewWarning: boolean) => setManager({ isNewWarning }),
-    handleShowSupport: (isShowSupport: boolean) =>
-      setManager({ isShowSupport }),
+    handleShowSupport: (isShowSupport: boolean) => {
+      if (!PRO_ENABLED) {
+        // 关闭专业版后不存在账户与付费入口，升级/试用弹窗永不置位
+        return;
+      }
+      setManager({ isShowSupport });
+    },
     handleLoadMore: (isLoadMore: boolean) => setManager({ isLoadMore }),
     handleAuthed: (isAuthed: boolean) => setManager({ isAuthed }),
     handleBookSortCode: (bookSortCode: { sort: number; order: number }) =>
@@ -577,6 +588,11 @@ export const useAppStore = create<AppState>()((set, get) => {
       );
     },
     handleFetchUserInfo: async () => {
+      if (!PRO_ENABLED) {
+        // 关闭专业版后不请求用户接口，也不做套餐/试用判断与 Koodo Sync 配置同步
+        get().handleUserInfo(null);
+        return null;
+      }
       let response = await fetchUserInfo();
       let userInfo: any = null;
       if (response.code === 200) {
@@ -630,6 +646,12 @@ export const useAppStore = create<AppState>()((set, get) => {
       return userInfo;
     },
     handleFetchPlugins: async () => {
+      // 插件加载前统一执行专业版策略：关闭时降级旧配置并备份，开启时回填备份
+      if (PRO_ENABLED) {
+        restoreProFeaturePolicy();
+      } else {
+        applyProFeaturePolicy();
+      }
       DatabaseService.getAllRecords("plugins").then(async (pluginList) => {
         try {
           const legacyAiPlugins = pluginList.filter(
@@ -753,7 +775,10 @@ export const useAppStore = create<AppState>()((set, get) => {
               pluginList.push(assistPlugin);
             }
           }
-          if (ConfigService.getReaderConfig("isDisableAI") !== "yes") {
+          if (
+            PRO_ENABLED &&
+            ConfigService.getReaderConfig("isDisableAI") !== "yes"
+          ) {
             let dictPlugin = new PluginModel(
               "official-ai-dict-plugin",
               "dictionary",
@@ -801,7 +826,10 @@ export const useAppStore = create<AppState>()((set, get) => {
           if (isAuthed && !ConfigService.getItem("serverRegion")) {
             ConfigService.setItem("serverRegion", "global");
           }
-          if (ConfigService.getReaderConfig("isDisableAI") !== "yes") {
+          if (
+            PRO_ENABLED &&
+            ConfigService.getReaderConfig("isDisableAI") !== "yes"
+          ) {
             let sortedVoiceList = [
               ...KookitConfig.OfficialVoiceList.map((item) => {
                 return {
@@ -864,6 +892,8 @@ export const useAppStore = create<AppState>()((set, get) => {
             );
             pluginList.push(voicePlugin);
           }
+          // 官方插件由注册条件拦截，这里再统一过滤一次，保证缓存/旧记录里的官方插件不进入 UI
+          pluginList = filterOfficialPlugins(pluginList);
           get().handlePlugins(pluginList);
           const sapiPlugin = pluginList.find(
             (item) => item.key === NATURAL_VOICE_SAPI_ADAPTER_PLUGIN_KEY
@@ -898,6 +928,14 @@ export const useAppStore = create<AppState>()((set, get) => {
       });
     },
     handleFetchAuthed: () => {
+      if (!PRO_ENABLED) {
+        // 关闭专业版后登录态恒为 false，跳过残留 is_authed 令牌读取；
+        // 同时尽早降级旧配置，避免启动自动同步在插件加载前用旧云端/Koodo 配置发起请求
+        applyProFeaturePolicy();
+        get().handleAuthed(false);
+        get().handleUserInfo(null);
+        return;
+      }
       try {
         TokenService.getToken("is_authed").then((value) => {
           let isAuthed = value === "yes";

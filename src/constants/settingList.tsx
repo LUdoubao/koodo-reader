@@ -1,3 +1,5 @@
+import { PRO_ENABLED } from "./featureFlag";
+
 export const generalSettingList = [
   {
     isElectron: false,
@@ -73,12 +75,17 @@ export const generalSettingList = [
     title: "Use file name as book title",
     propName: "isUseOriginalName",
   },
-  {
-    isElectron: false,
-    title: "Recognize book title and author with AI on import",
-    desc: "When importing books, if no book title is parsed from the book metadata, AI will be used to recognize the book title and author",
-    propName: "isAIAnalyzeTitle",
-  },
+  // 导入时 AI 书名识别依赖官方 AI，关闭专业版时该开关不展示
+  ...(PRO_ENABLED
+    ? [
+        {
+          isElectron: false,
+          title: "Recognize book title and author with AI on import",
+          desc: "When importing books, if no book title is parsed from the book metadata, AI will be used to recognize the book title and author",
+          propName: "isAIAnalyzeTitle",
+        },
+      ]
+    : []),
   {
     isElectron: true,
     title: "Disable update notification",

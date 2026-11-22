@@ -13,6 +13,8 @@ import { getCloudConfig } from "./common";
 import CoverUtil from "./coverUtil";
 import { LocalFileManager } from "./localFile";
 import TokenService from "../storage/tokenService";
+import { PRO_ENABLED } from "../../constants/featureFlag";
+import { isFreeDriveService } from "../pro/proFeatureGuard";
 declare var window: any;
 
 class BookUtil {
@@ -476,12 +478,17 @@ class BookUtil {
     if (key.startsWith("cache")) {
       return;
     }
-    let isAuthed = await TokenService.getToken("is_authed");
-    if (isAuthed !== "yes") {
-      return;
-    }
     let service = ConfigService.getItem("defaultSyncOption");
     if (!service) {
+      return;
+    }
+    if (PRO_ENABLED) {
+      let isAuthed = await TokenService.getToken("is_authed");
+      if (isAuthed !== "yes") {
+        return;
+      }
+    } else if (!isFreeDriveService(service)) {
+      // 关闭专业版后仅放行本地文件夹；旧云盘令牌不能绕过 UI 直接上传
       return;
     }
     if (isElectron) {
@@ -521,12 +528,17 @@ class BookUtil {
     }
   }
   static async deleteCloudBook(key: string, format: string) {
-    let isAuthed = await TokenService.getToken("is_authed");
-    if (isAuthed !== "yes") {
-      return;
-    }
     let service = ConfigService.getItem("defaultSyncOption");
     if (!service) {
+      return;
+    }
+    if (PRO_ENABLED) {
+      let isAuthed = await TokenService.getToken("is_authed");
+      if (isAuthed !== "yes") {
+        return;
+      }
+    } else if (!isFreeDriveService(service)) {
+      // 关闭专业版后仅放行本地文件夹；旧云盘令牌不能绕过 UI 直接删除云端文件
       return;
     }
     if (isElectron) {

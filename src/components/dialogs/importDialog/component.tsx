@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import "./importDialog.css";
 import { driveList } from "../../../constants/driveList";
+import { PRO_ENABLED } from "../../../constants/featureFlag";
 import { Trans } from "react-i18next";
 import { useAppStore } from "../../../store/useAppStore";
 import toast from "react-hot-toast";
@@ -677,7 +678,8 @@ const ImportDialog = () => {
               </div>
             )}
             {/* Web 端只保留百度网盘入口，其余云盘导入入口不展示；桌面端行为不变 */}
-            {isElectron &&
+            {PRO_ENABLED &&
+              isElectron &&
               driveList
               .filter(
                 (item) =>

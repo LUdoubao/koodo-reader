@@ -16,6 +16,7 @@ import {
 import { useAppStore } from "../../store/useAppStore";
 import WindowControls from "../windowControls";
 import { useLayout } from "../../utils/hooks/useLayoutMode";
+import { PRO_ENABLED } from "../../constants/featureFlag";
 
 export interface ReaderTopToolbarProps {
   isNearEdge: boolean;
@@ -379,6 +380,7 @@ const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
                   style={{ fontSize: 19 }}
                 ></span>
               </div>
+              {PRO_ENABLED && (
               <div
                 className="reader-setting-icon-container"
                 aria-label={t("Translate")}
@@ -394,6 +396,7 @@ const ReaderTopToolbar = (props: ReaderTopToolbarProps) => {
                   style={{ fontSize: 19 }}
                 ></span>
               </div>
+              )}
               <div
                 className="reader-setting-icon-container reader-toolbar-assist-read"
                 aria-label={t("Reading option")}

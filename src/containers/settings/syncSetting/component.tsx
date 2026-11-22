@@ -29,6 +29,12 @@ import {
 } from "../../../utils/common";
 
 import { driveInputConfig, driveList } from "../../../constants/driveList";
+import { PRO_ENABLED } from "../../../constants/featureFlag";
+import { isFreeDriveService } from "../../../utils/pro/proFeatureGuard";
+import {
+  clearLocalFolderPath,
+  setLocalFolderPath,
+} from "../../../utils/file/localFolder";
 import { backup } from "../../../utils/file/backup";
 import { restore } from "../../../utils/file/restore";
 import {
@@ -142,6 +148,10 @@ const SyncSetting = () => {
     if (!targetDrive) {
       return;
     }
+    if (!PRO_ENABLED && !isFreeDriveService(targetDrive)) {
+      // 关闭专业版后只允许添加本地文件夹，其余数据源不进入绑定流程
+      return;
+    }
     if (
       !driveList
         .find((item) => item.value === targetDrive)
@@ -155,11 +165,13 @@ const SyncSetting = () => {
       );
       return;
     }
-    if (!isAuthed) {
-      toast(t("Please upgrade to Pro to use this feature"));
-      handleSetting(true);
-      handleSettingMode("account");
-      return;
+    if (PRO_ENABLED) {
+      if (!isAuthed) {
+        toast(t("Please upgrade to Pro to use this feature"));
+        handleSetting(true);
+        handleSettingMode("account");
+        return;
+      }
     }
     if (
       !isElectron &&
@@ -170,6 +182,7 @@ const SyncSetting = () => {
       }
     }
     if (
+      PRO_ENABLED &&
       driveList.find((item) => item.value === targetDrive)?.isPro &&
       !isAuthed
     ) {
@@ -206,9 +219,15 @@ const SyncSetting = () => {
         }
       }
       toast.loading(i18n.t("Adding"), { id: "adding-sync-id" });
-      let res = await encryptToken(settingDrive, {
-        drivePath: drivePath,
-      });
+      let res: any = { code: 200 };
+      if (PRO_ENABLED || settingDrive !== "folder") {
+        res = await encryptToken(settingDrive, {
+          drivePath: drivePath,
+        });
+      } else {
+        // 关闭专业版后本地文件夹目录以明文保存，不经过令牌加解密与登录态
+        setLocalFolderPath(drivePath);
+      }
       if (res.code === 200) {
         toast.success(i18n.t("Binding successful"), { id: "adding-sync-id" });
       } else {
@@ -227,7 +246,7 @@ const SyncSetting = () => {
       ConfigService.setListConfig(settingDrive, "dataSourceList");
       toast.success(i18n.t("Binding successful"), { id: "adding-sync-id" });
       if (
-        isAuthed &&
+        (!PRO_ENABLED || isAuthed) &&
         !ConfigService.getItem("defaultSyncOption") &&
         settingDrive !== "microsoft_exp"
       ) {
@@ -283,6 +302,10 @@ const SyncSetting = () => {
       });
     }
     ConfigService.deleteListConfig(targetDrive, "dataSourceList");
+    if (!PRO_ENABLED && targetDrive === "folder") {
+      // 关闭专业版后本地文件夹目录保存在本地配置里，删除数据源时一并清理
+      clearLocalFolderPath();
+    }
     handleFetchDataSourceList();
     if (targetDrive === ConfigService.getItem("defaultSyncOption")) {
       ConfigService.removeItem("defaultSyncOption");
@@ -298,7 +321,7 @@ const SyncSetting = () => {
     if (!newValue) {
       return;
     }
-    if (!isAuthed) {
+    if (PRO_ENABLED && !isAuthed) {
       toast(t("Please upgrade to Pro to use this feature"));
       handleSetting(true);
       handleSettingMode("account");
@@ -358,6 +381,7 @@ const SyncSetting = () => {
       return;
     }
     if (
+      PRO_ENABLED &&
       driveList.find((item) => item.value === targetDrive)?.isPro &&
       !isAuthed
     ) {
@@ -564,6 +588,11 @@ const SyncSetting = () => {
 
   const renderSwitchOption = (optionList: any[]) => {
     return optionList.map((item) => {
+      // 关闭专业版时不渲染 Koodo 云同步开关：打开它会写用户配置并发起
+      // updateUserConfig 请求，等于在无账号构建里重新激活官方云同步。
+      if (!PRO_ENABLED && item.propName === "isEnableKoodoSync") {
+        return null;
+      }
       return (
         <div
           style={item.isElectron ? (isElectron ? {} : { display: "none" }) : {}}
@@ -576,6 +605,10 @@ const SyncSetting = () => {
             onClick={async () => {
               switch (item.propName) {
                 case "isEnableKoodoSync":
+                  // 关闭专业版时该开关不应存在；保留防御性早退，避免旧状态被触发。
+                  if (!PRO_ENABLED) {
+                    return;
+                  }
                   handleToggleSetting(item.propName);
                   let encryptToken = await TokenService.getToken(
                     defaultSyncOption + "_token"
