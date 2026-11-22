@@ -24,9 +24,6 @@
   padding-top: var(--safe-top);
   padding-bottom: var(--safe-bottom);
   box-sizing: border-box;
-  /* Above the mobile import source picker (40): the picker opens this sheet
-     for an unauthorized Pro drive, so it must not be covered by it. */
-  z-index: 45;
 }
 
 [data-layout="mobile"] .setting-dialog-sidebar {

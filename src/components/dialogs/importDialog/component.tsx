@@ -134,6 +134,15 @@ const ImportDialog = () => {
     handleImportDialog(false);
   };
 
+  // mobile: the source picker is its own full-screen sheet and sits above the
+  // settings sheet, so the picker steps aside before opening settings instead
+  // of covering it. Desktop keeps the dialog open underneath as before.
+  const openSettingFromPicker = (mode: "account" | "sync") => {
+    if (layout === "mobile") handleImportDialog(false);
+    handleSetting(true);
+    handleSettingMode(mode);
+  };
+
   const showMessage = (message: string) => {
     toast(t(message));
   };
@@ -142,8 +151,7 @@ const ImportDialog = () => {
       toast(
         t("Please add data source in the setting-Sync and backup first")
       );
-      handleSetting(true);
-      handleSettingMode("sync");
+      openSettingFromPicker("sync");
       return;
     }
     if (
@@ -151,16 +159,14 @@ const ImportDialog = () => {
       !isAuthed
     ) {
       toast(t("Please upgrade to Pro to use this feature"));
-      handleSetting(true);
-      handleSettingMode("account");
+      openSettingFromPicker("account");
       return;
     }
     if (event.target.value === "add") {
       toast(
         t("Please add data source in the setting-Sync and backup first")
       );
-      handleSetting(true);
-      handleSettingMode("sync");
+      openSettingFromPicker("sync");
 
       return;
     }
@@ -687,14 +693,12 @@ const ImportDialog = () => {
                       toast(
                         t("Please upgrade to Pro to use this feature")
                       );
-                      handleSetting(true);
-                      handleSettingMode("account");
+                      openSettingFromPicker("account");
                       return;
                     }
 
                     if (!dataSourceList.includes(item.value)) {
-                      handleSetting(true);
-                      handleSettingMode("sync");
+                      openSettingFromPicker("sync");
                       handleSettingDrive(item.value);
                       let settingDrive = item.value;
                       if (
