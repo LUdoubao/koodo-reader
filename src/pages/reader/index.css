@@ -225,11 +225,54 @@
 }
 
 /* mobile: the engine centres the text column at 60% of the viewport, which
-   wastes 40% of a phone screen. Keep a small page gutter instead. */
+   wastes 40% of a phone screen. Keep a small page gutter, but let the saved
+   page-width scale and margin still act on that gutter-sized column. */
 [data-layout="mobile"] .html-viewer-page {
-  width: calc(100% - 16px) !important;
+  width: min(
+    calc(
+      (100% - 16px - var(--reader-page-inset, 0px)) *
+        var(--reader-page-scale, 1)
+    ),
+    calc(100% - 16px)
+  ) !important;
   max-width: calc(100% - 16px);
-  left: 8px !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin-inline: auto !important;
+}
+
+/* desktop: the single/scroll engine ignores the saved margin, so apply it to
+   the same 60% baseline and keep the locked side panels unobstructed. */
+[data-layout="desktop"][data-reader-page-margin="on"][data-reader-page-mode="single"]
+  .html-viewer-page,
+[data-layout="desktop"][data-reader-page-margin="on"][data-reader-page-mode="scroll"]
+  .html-viewer-page {
+  width: max(
+    0px,
+    calc(
+      60% * var(--reader-page-scale, 1) - var(--reader-page-inset, 0px) -
+        var(--reader-panel-left, 0px) - var(--reader-panel-right, 0px)
+    )
+  ) !important;
+  max-width: none !important;
+  left: var(--reader-panel-left, 0px) !important;
+  right: var(--reader-panel-right, 0px) !important;
+  margin-inline: auto !important;
+}
+
+[data-layout="desktop"][data-reader-page-margin="on"][data-reader-page-mode="double"]
+  .html-viewer-page {
+  width: max(
+    0px,
+    calc(
+      100% - 80px - var(--reader-page-inset, 0px) -
+        var(--reader-panel-left, 0px) - var(--reader-panel-right, 0px)
+    )
+  ) !important;
+  max-width: none !important;
+  left: var(--reader-panel-left, 0px) !important;
+  right: var(--reader-panel-right, 0px) !important;
+  margin-inline: auto !important;
 }
 
 /* mobile: the in-page header carries chapter title, reading time and progress.

@@ -102,6 +102,9 @@ const Reader = () => {
   );
   const isSettingLocked = useAppStore((s) => s.reader.isSettingLocked);
   const isDockedRight = useAppStore((s) => s.reader.isDockedRight);
+  const pageScale = useAppStore((s) => s.reader.scale);
+  const pageMargin = useAppStore((s) => s.reader.margin);
+  const isFitPage = useAppStore((s) => s.reader.isFitPage);
   const isSettingOpen = useAppStore((s) => s.manager.isSettingOpen);
   const isOpenMenu = useAppStore((s) => s.viewArea.isOpenMenu);
   const menuMode = useAppStore((s) => s.viewArea.menuMode);
@@ -124,6 +127,34 @@ const Reader = () => {
   const handleBackgroundColor = useAppStore((s) => s.handleBackgroundColor);
   const { t } = useTranslation();
   const { layout } = useLayout();
+  useEffect(() => {
+    const root = document.documentElement;
+    const parsedScale = Number.parseFloat(pageScale);
+    const parsedMargin = Number.parseFloat(pageMargin);
+    const safeScale =
+      Number.isFinite(parsedScale) && parsedScale > 0 ? parsedScale : 1;
+    const safeMargin = Number.isFinite(parsedMargin) ? parsedMargin : 0;
+    root.style.setProperty("--reader-page-scale", String(safeScale));
+    root.style.setProperty("--reader-page-inset", `${safeMargin * 2}px`);
+    root.style.setProperty(
+      "--reader-panel-left",
+      isNavLocked ? "300px" : "0px"
+    );
+    root.style.setProperty(
+      "--reader-panel-right",
+      isSettingLocked ? "300px" : "0px"
+    );
+    root.dataset.readerPageMargin =
+      safeMargin !== 0 && !isFitPage ? "on" : "off";
+    root.dataset.readerPageMode = readerMode;
+  }, [
+    pageScale,
+    pageMargin,
+    isNavLocked,
+    isSettingLocked,
+    isFitPage,
+    readerMode,
+  ]);
   const currentProps = {
     t,
     currentBook,
